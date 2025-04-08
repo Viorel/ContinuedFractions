@@ -11,6 +11,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
+using System.Windows.Documents.DocumentStructures;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -26,7 +27,7 @@ namespace ContinuedFractions
     /// </summary>
     public partial class UCToContinuedFraction : UserControl
     {
-        const int MAX_CONTINUED_FRACTION_ITEMS = 300;
+        const int MAX_CONTINUED_FRACTION_ITEMS = 100;
         const int MAX_BIGINTEGER_BYTE_SIZE = 128;
         readonly TimeSpan DELAY_BEFORE_CALCULATION = TimeSpan.FromMilliseconds( 333 );
         readonly TimeSpan DELAY_BEFORE_PROGRESS = TimeSpan.FromMilliseconds( 333 );
@@ -320,7 +321,7 @@ namespace ContinuedFractions
 
                     if( d.GetByteCount( ) > MAX_BIGINTEGER_BYTE_SIZE )
                     {
-                        error_text = "The denominator is too large.";
+                        error_text = "The number exceeds the supported limits.";
                     }
                 }
 
@@ -331,7 +332,7 @@ namespace ContinuedFractions
 
                     if( n.GetByteCount( ) > MAX_BIGINTEGER_BYTE_SIZE )
                     {
-                        error_text = "The numerator is too large.";
+                        error_text = "The number exceeds the supported limits.";
                     }
                 }
 
@@ -404,13 +405,38 @@ namespace ContinuedFractions
 
             if( too_long )
             {
-                remarks = $"{remarks}The continued fraction is too long.";
+                remarks = $"{remarks}⚠ The continued fraction is too long.";
+            }
+
+            StringBuilder sb_convergents = new( );
+
+            int convergent_number = 0;
+            foreach( (BigInteger n, BigInteger d) p in ContinuedFractionUtilities.EnumerateContinuedFractionConvergents( continued_fraction_items ) )
+            {
+                Fraction f = new( p.n, p.d );
+                string fs = f.ToFloatString( cnc, 20 );
+                bool fsa = fs.Contains( '≈' );
+                fs = fs.Replace( "≈", "" );
+
+                sb_convergents
+                    .AppendLine( $"{convergent_number.ToString( ).PadLeft( 2, '\u2007' )}:\u2007{p.n:D} / {p.d:D} {( fsa ? '≈' : '=' )} {fs}" );
+
+                ++convergent_number;
             }
 
             Dispatcher.BeginInvoke( ( ) =>
             {
                 runContinuedFraction.Text = sb.ToString( );
                 runContinuedFractionRemark.Text = remarks;
+                if( string.IsNullOrWhiteSpace( remarks ) )
+                {
+                    UIUtilities.ShowTopBlock( false, richTextBoxResults.Document, sectionContinuedFraction, sectionContinuedFractionRemark );
+                }
+                else
+                {
+                    UIUtilities.ShowTopBlock( true, richTextBoxResults.Document, sectionContinuedFraction, sectionContinuedFractionRemark );
+                }
+                runContinuedFractionConvergents.Text = sb_convergents.ToString( );
 
                 ShowOneRichTextBox( richTextBoxResults );
             } );

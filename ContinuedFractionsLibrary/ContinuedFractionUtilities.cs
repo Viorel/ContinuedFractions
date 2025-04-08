@@ -27,7 +27,7 @@ namespace ContinuedFractionsLibrary
             }
         }
 
-        public static IEnumerable<(BigInteger n, BigInteger d)> EnumerateContinuedFractionBackward( IReadOnlyList<BigInteger> continuedFraction )
+        public static IEnumerable<(BigInteger n, BigInteger d)> EnumerateContinuedFractionConvergents( IReadOnlyList<BigInteger> continuedFraction )
         {
             // https://r-knott.surrey.ac.uk/Fibonacci/cfINTRO.html#convergrecurr
 

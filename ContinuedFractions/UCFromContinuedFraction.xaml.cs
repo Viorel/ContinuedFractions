@@ -227,7 +227,7 @@ namespace ContinuedFractions
             {
                 Fraction[] fractions =
                     ContinuedFractionUtilities
-                        .EnumerateContinuedFractionBackward( continuedFraction )
+                        .EnumerateContinuedFractionConvergents( continuedFraction )
                         .Select( p => new Fraction( p.n, p.d ) )
                         .ToArray( );
 
