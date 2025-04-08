@@ -1,0 +1,79 @@
+﻿<UserControl x:Class="ContinuedFractions.UCToContinuedFraction"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ContinuedFractions"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800"
+             Loaded="UserControl_Loaded">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0" Orientation="Vertical" VerticalAlignment="Top">
+            <Label Content="Decimal _number or rational fraction:" Target="{Binding ElementName=textBoxNumber}"/>
+            <TextBox x:Name="textBoxNumber" Padding="3 3" FontSize="22" TextChanged="textBoxNumber_TextChanged" d:Text="1234"/>
+            <Label Content="Examples: 12.345, 123/45, 12.3(45), 1.2345e-7" FontStyle="Italic" Padding="4 1" />
+            <Label Content="_Results:" Target="{Binding ElementName=richTextBoxResults}" Margin="0 8 0 0"/>
+        </StackPanel>
+        <Grid Grid.Row="1">
+            <RichTextBox x:Name="richTextBoxNote" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto" FontSize="14" d:Visibility="Hidden">
+                <FlowDocument>
+                    <Paragraph Padding="2 18">
+                        <Run Text="The results will be displayed here." FontStyle="Italic"/>
+                    </Paragraph>
+                </FlowDocument>
+            </RichTextBox>
+
+            <RichTextBox x:Name="richTextBoxTypicalError" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto" 
+                         FontSize="14" Padding="2 10"
+                         d:Visibility="Hidden">
+                <FlowDocument>
+                    <Paragraph>
+                        <Run Text="The entered number is invalid."/>
+                    </Paragraph>
+                    <Paragraph>
+                        <Run Text="Please enter a number or fraction, for example:"/>
+                    </Paragraph>
+                    <Paragraph Margin="14 0" FontWeight="Bold">
+                        <Run Text="0.1234"/>
+                        <LineBreak/>
+                        <Run Text="-12.345"/>
+                        <LineBreak/>
+                        <Run Text="12.345e-6"/>
+                        <LineBreak/>
+                        <Run Text="1234/56789"/>
+                        <LineBreak/>
+                        <Run Text="-1234e+7/56789"/>
+                        <LineBreak/>
+                    </Paragraph>
+                </FlowDocument>
+            </RichTextBox>
+
+            <RichTextBox x:Name="richTextBoxError" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto" d:Visibility="Hidden">
+                <FlowDocument>
+                    <Paragraph Padding="2 18" FontSize="14" >
+                        <Run x:Name="runError" d:Text="Error"/>
+                    </Paragraph>
+                </FlowDocument>
+            </RichTextBox>
+
+            <RichTextBox x:Name="richTextBoxResults" d:Visibility="Visible" Padding="8">
+                <FlowDocument>
+                    <Paragraph >
+                        <Run x:Name="runContinuedFraction" FontWeight="Bold" FontSize="22" d:Text="[1; 2, 3, 4]"/>
+                    </Paragraph>
+                    <Paragraph >
+                        <Run x:Name="runContinuedFractionRemark" d:Text="Remarks"/>
+                    </Paragraph>
+                </FlowDocument>
+            </RichTextBox>
+
+            <Label x:Name="labelPleaseWait" Content="Calculation in progress... " VerticalAlignment="Bottom" HorizontalAlignment="Left" BorderBrush="Gray" BorderThickness="0.25" 
+                           Visibility="Hidden" d:Visibility="Visible"/>
+
+        </Grid>
+    </Grid>
+</UserControl>

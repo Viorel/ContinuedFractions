@@ -1,0 +1,23 @@
+﻿<Window x:Class="ContinuedFractions.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ContinuedFractions"
+        mc:Ignorable="d"
+        Title="Continued Fractions" Width="600" Height="371"
+        SourceInitialized="Window_SourceInitialized"
+        Loaded="Window_Loaded" 
+        Closing="Window_Closing"
+        >
+    <Grid>
+        <TabControl x:Name="tabControl" >
+            <TabItem Header="To Continued Fraction">
+                <local:UCToContinuedFraction x:Name="ucToContinuedFraction"/>
+            </TabItem>
+            <TabItem Header="From Continued Fraction">
+                <local:UCFromContinuedFraction x:Name="ucFromContinuedFraction"/>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Window>
