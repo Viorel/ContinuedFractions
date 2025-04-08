@@ -9,29 +9,48 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="1*" MinHeight="80"/>
+            <RowDefinition Height="5"/>
+            <RowDefinition Height="1*" MinHeight="80"/>
         </Grid.RowDefinitions>
 
-        <Label Grid.Column="0" Grid.Row="0" Content="Continued fraction:" Target="{Binding ElementName=textBoxContinuedFraction}"/>
+        <Grid Grid.Column="0" Grid.Row="0" Margin="0 0 0 8">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
 
-        <TextBox x:Name="textBoxContinuedFraction" Grid.Column="0" Grid.Row="1" Padding="3 3" FontSize="22" TextChanged="textBoxContinuedFraction_TextChanged"
+            <Label Grid.Row="0" Content="Continued fraction:" Target="{Binding ElementName=textBoxContinuedFraction}"/>
+
+            <TextBox Grid.Row="1" x:Name="textBoxContinuedFraction" Padding="3 3" FontSize="22" TextChanged="textBoxContinuedFraction_TextChanged"
                  d:Text="[1; 2, 3, 4 ]" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"/>
 
-        <TextBlock Grid.Column="0" Grid.Row="2" >
-            <Run Text="Examples:" FontStyle="Italic"/>
-            <Run Text="[1; 2, 3], -[4; 5, 6] or just 7 8 9." />
-            <Run Text="Brackets and delimiters are optional." FontStyle="Italic"/>
-        </TextBlock>
+            <Label Grid.Row="2" Opacity="0.7">
+                <TextBlock >
+                    <Run Text="Example:" FontStyle="Italic"/>
+                    <Run Text="[1; 2, 3, 4]" />
+                    <Run Text="or just" FontStyle="Italic"/>
+                    <Run Text="1 2 3 4" />
+                </TextBlock>
+            </Label>
+        </Grid>
 
-        <StackPanel Grid.Column="0" Grid.Row="3" Orientation="Vertical" VerticalAlignment="Bottom">
-            <Label Content="Results:"/>
+        <GridSplitter Grid.Column="0" Grid.Row="1" IsTabStop="False" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" HorizontalAlignment="Stretch"/>
 
-            <Grid>
-                <RichTextBox x:Name="richTextBoxNote" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto" FontSize="14" d:Visibility="Hidden">
-                    <FlowDocument>
+        <Grid Grid.Column="0" Grid.Row="2" Margin="0 8 0 0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Label Grid.Row="0" Content="Results:"/>
+
+            <Grid Grid.Row="1">
+                <RichTextBox x:Name="richTextBoxNote" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto" FontSize="14" 
+                         Background="{DynamicResource {x:Static SystemColors.InfoBrushKey}}" Foreground="{DynamicResource {x:Static SystemColors.InfoTextBrushKey}}"
+                         d:Visibility="Hidden">
+                    <FlowDocument >
                         <Paragraph Padding="2 18">
                             <Run Text="The results will be displayed here." FontStyle="Italic"/>
                         </Paragraph>
@@ -40,10 +59,11 @@
 
                 <RichTextBox x:Name="richTextBoxTypicalError" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto" 
                          FontSize="14" Padding="2 10"
+                         Background="{DynamicResource {x:Static SystemColors.InfoBrushKey}}" Foreground="{DynamicResource {x:Static SystemColors.InfoTextBrushKey}}"
                          d:Visibility="Hidden">
                     <FlowDocument>
                         <Paragraph>
-                            <Run Text="The entered continued fraction is invalid."/>
+                            <Run FontWeight="Bold" Text="⚠ The entered value is invalid."/>
                         </Paragraph>
                         <Paragraph>
                             <Run Text="Please enter a valid continued fraction, for example:"/>
@@ -61,56 +81,72 @@
                     </FlowDocument>
                 </RichTextBox>
 
-                <RichTextBox x:Name="richTextBoxError" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto" d:Visibility="Hidden">
+                <RichTextBox x:Name="richTextBoxError" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto" 
+                         Background="{DynamicResource {x:Static SystemColors.InfoBrushKey}}" Foreground="{DynamicResource {x:Static SystemColors.InfoTextBrushKey}}"
+                         d:Visibility="Hidden">
                     <FlowDocument>
-                        <Paragraph Padding="2 18" FontSize="14" >
+                        <Paragraph Padding="2 14 2 0" FontSize="14" >
+                            <Run Text="⚠️" FontSize="22" BaselineAlignment="Center"/>
+                            <Run Text="ERROR" FontWeight="Bold" BaselineAlignment="Center"/>
+                        </Paragraph>
+                        <Paragraph Padding="2 0 2 0" FontSize="14" >
                             <Run x:Name="runError" d:Text="Error"/>
                         </Paragraph>
                     </FlowDocument>
                 </RichTextBox>
 
-                <RichTextBox x:Name="richTextBoxResults" MinHeight="100" d:Visibility="Visible">
+                <RichTextBox x:Name="richTextBoxResults" Padding="8" IsReadOnly="True" IsReadOnlyCaretVisible="True" VerticalScrollBarVisibility="Auto" d:Visibility="Visible">
                     <FlowDocument>
-                        <Table>
+                        <Table CellSpacing="0">
                             <Table.Columns>
-                                <TableColumn/>
+                                <TableColumn Width="100"/>
                                 <TableColumn/>
                             </Table.Columns>
                             <TableRowGroup>
                                 <TableRow>
                                     <TableCell>
-                                        <Paragraph>
+                                        <Paragraph TextAlignment="Right" Padding="0 5 0 0">
                                             Decimal number:
                                         </Paragraph>
                                     </TableCell>
                                     <TableCell>
-                                        <Paragraph>
-                                            <Run x:Name="runResultAsDecimal" d:Text="12.345"/>
+                                        <Paragraph Padding="8 0">
+                                            <Run x:Name="runResultAsDecimal" FontWeight="Bold" FontSize="18" d:Text="12.345"/>
                                         </Paragraph>
                                     </TableCell>
                                 </TableRow>
                                 <TableRow>
                                     <TableCell>
-                                        <Paragraph>
+                                        <Paragraph TextAlignment="Right" Padding="0 5 0 0">
                                             Fraction:
                                         </Paragraph>
                                     </TableCell>
                                     <TableCell>
-                                        <Paragraph>
-                                            <Run x:Name="runResultAsFraction" d:Text="12/345"/>
+                                        <Paragraph Padding="8 0">
+                                            <Run x:Name="runResultAsFraction" FontWeight="Bold" FontSize="18" d:Text="12/345"/>
                                         </Paragraph>
                                     </TableCell>
                                 </TableRow>
                             </TableRowGroup>
                         </Table>
+
+                        <Paragraph>
+                            <Run Text="Convergents:" FontWeight="Bold"/>
+                        </Paragraph>
+                        <Section Padding="8 0">
+                            <Paragraph>
+                                <Run x:Name="runResultConvergents" d:Text="0: 1/2=0.5&#10;&#13;1: 7/8=XXX"/>
+                            </Paragraph>
+                        </Section>
                     </FlowDocument>
                 </RichTextBox>
 
-                <Label x:Name="labelPleaseWait" Content="Calculation in progress... " VerticalAlignment="Bottom" HorizontalAlignment="Left" BorderBrush="Gray" BorderThickness="0.25" 
-                           Visibility="Hidden" d:Visibility="Hidden"/>
-
+                <Label x:Name="labelPleaseWait" Content="Calculation in progress... " VerticalAlignment="Bottom" HorizontalAlignment="Left" 
+                   BorderBrush="{DynamicResource {x:Static SystemColors.WindowFrameBrushKey}}" BorderThickness="0.75" 
+                   Background="{DynamicResource {x:Static SystemColors.InfoBrushKey}}" Foreground="{DynamicResource {x:Static SystemColors.InfoTextBrushKey}}"
+                   Visibility="Hidden" d:Visibility="Visible"/>
             </Grid>
 
-        </StackPanel>
+        </Grid>
     </Grid>
 </UserControl>

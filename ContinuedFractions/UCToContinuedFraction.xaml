@@ -13,7 +13,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <StackPanel Grid.Row="0" Orientation="Vertical" VerticalAlignment="Top">
-            <Label Content="Decimal _number or rational fraction:" Target="{Binding ElementName=textBoxNumber}"/>
+            <Label Content="Decimal _number or fraction:" Target="{Binding ElementName=textBoxNumber}"/>
             <TextBox x:Name="textBoxNumber" Padding="3 3" FontSize="22" TextChanged="textBoxNumber_TextChanged" d:Text="1234"/>
             <Label Content="Examples: 12.345, 123/45, 12.3(45), 1.2345e-7" FontStyle="Italic" Padding="4 1" Opacity="0.7" />
             <Label Content="_Results:" Target="{Binding ElementName=richTextBoxResults}" Margin="0 8 0 0"/>
@@ -32,7 +32,7 @@
             <RichTextBox x:Name="richTextBoxTypicalError" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto" 
                          FontSize="14" Padding="2 10"
                          Background="{DynamicResource {x:Static SystemColors.InfoBrushKey}}" Foreground="{DynamicResource {x:Static SystemColors.InfoTextBrushKey}}"
-                         d:Visibility="Visible">
+                         d:Visibility="Hidden">
                 <FlowDocument >
                     <Paragraph>
                         <Run FontWeight="Bold" Text="⚠ The entered value is invalid."/>
@@ -71,7 +71,7 @@
                 </FlowDocument>
             </RichTextBox>
 
-            <RichTextBox x:Name="richTextBoxResults" Padding="8" d:Visibility="Hidden" >
+            <RichTextBox x:Name="richTextBoxResults" Padding="8" IsReadOnly="True" IsReadOnlyCaretVisible="True" VerticalScrollBarVisibility="Auto" d:Visibility="Hidden" >
                 <FlowDocument>
                     <Section x:Name="sectionContinuedFraction" Padding="0" Margin="0">
                         <Paragraph>
@@ -88,7 +88,7 @@
                     </Paragraph>
                     <Section Padding="8 0">
                         <Paragraph>
-                            <Run x:Name="runContinuedFractionConvergents" d:Text="1/2=0.5&#10;&#13;7/8=XXX"/>
+                            <Run x:Name="runContinuedFractionConvergents" d:Text="0: 1/2=0.5&#10;&#13;1: 7/8=XXX"/>
                         </Paragraph>
                     </Section>
                 </FlowDocument>

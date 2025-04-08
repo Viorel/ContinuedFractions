@@ -25,6 +25,7 @@ namespace ContinuedFractions
     /// </summary>
     public partial class UCFromContinuedFraction : UserControl
     {
+        const int MAX_BIGINTEGER_BYTE_SIZE = 128;
         readonly TimeSpan DELAY_BEFORE_CALCULATION = TimeSpan.FromMilliseconds( 333 );
         readonly TimeSpan DELAY_BEFORE_PROGRESS = TimeSpan.FromMilliseconds( 333 );
         readonly TimeSpan MIN_DURATION_PROGRESS = TimeSpan.FromMilliseconds( 444 );
@@ -225,24 +226,17 @@ namespace ContinuedFractions
         {
             try
             {
-                Fraction[] fractions =
+                Fraction[] convergents =
                     ContinuedFractionUtilities
                         .EnumerateContinuedFractionConvergents( continuedFraction )
                         .Select( p => new Fraction( p.n, p.d ) )
                         .ToArray( );
 
-                CalculationContext ctx = new( cnc, 33 );
-
                 string? error_text = null;
-
 
                 if( error_text == null )
                 {
-
-                    Fraction fraction = fractions.Last( );
-                    fraction = fraction.Simplify( ctx );
-
-                    ShowResults( cnc, fraction );
+                    ShowResults( cnc, convergents );
 
                     HideProgress( );
                 }
@@ -268,15 +262,62 @@ namespace ContinuedFractions
             }
         }
 
-        void ShowResults( ICancellable cnc, Fraction result )
+        void ShowResults( ICancellable cnc, Fraction[] convergents )
         {
-            string result_as_decimal = result.ToFloatString( cnc, 15 );
-            string result_as_fraction = result.ToRationalString( cnc, 15 ); //................
+            CalculationContext ctx = new( cnc, 33 );
+
+            Fraction result = convergents.Last( );
+            result = result.Simplify( ctx );
+
+            string result_as_decimal = result.ToFloatString( cnc, 20 );
+
+            bool is_negative = result.IsNegative;
+            BigInteger n = BigInteger.Abs( result.N );
+            BigInteger d = result.D;
+            BigInteger e = result.E;
+
+            while( e < 0 )
+            {
+                d *= 10;
+                ++e;
+
+                if( d.GetByteCount( ) > MAX_BIGINTEGER_BYTE_SIZE ) throw new ApplicationException( "The number exceeds the supported limits." );
+            }
+
+            while( e > 0 )
+            {
+                n *= 10;
+                --e;
+
+                if( n.GetByteCount( ) > MAX_BIGINTEGER_BYTE_SIZE ) throw new ApplicationException( "The number exceeds the supported limits." );
+            }
+
+            string result_as_fraction = $"{( is_negative ? -n : n ):D}";
+            if( !e.IsZero ) result_as_fraction = $"{result_as_fraction}e{( e >= 0 ? "+" : "" )}{e:D}";
+            if( !d.IsOne ) result_as_fraction = $"{result_as_fraction} / {d:D}";
+
+            StringBuilder sb_convergents = new( );
+
+            int convergent_number = 0;
+            foreach( Fraction f in convergents )
+            {
+                Debug.Assert( f.E == 0 );
+
+                string fs = f.ToFloatString( cnc, 20 );
+                bool fsa = fs.Contains( '≈' );
+                fs = fs.Replace( "≈", "" );
+
+                sb_convergents
+                    .AppendLine( $"{convergent_number.ToString( ).PadLeft( 2, '\u2007' )}:\u2007{f.N:D} / {f.D:D} {( fsa ? '≈' : '=' )} {fs}" );
+
+                ++convergent_number;
+            }
 
             Dispatcher.BeginInvoke( ( ) =>
             {
                 runResultAsDecimal.Text = result_as_decimal;
                 runResultAsFraction.Text = result_as_fraction;
+                runResultConvergents.Text = sb_convergents.ToString( );
 
                 ShowOneRichTextBox( richTextBoxResults );
             } );
@@ -397,7 +438,7 @@ namespace ContinuedFractions
             (?xni)
             ^
             \s* \[? \s*
-            (?<first>\d+) (\s* ([,;]|\s+) \s* (?<next>\d+))*
+            (?<first>\d+) (\s* ([,;]|\s+) \s* (?<next>\d+))* [,;]?
             \s* \]? \s*
             $
             """, RegexOptions.IgnorePatternWhitespace
