@@ -14,13 +14,12 @@
         </Grid.RowDefinitions>
         <StackPanel Grid.Row="0" Orientation="Vertical" VerticalAlignment="Top">
             <Label Content="Decimal _number or fraction:" Target="{Binding ElementName=textBoxNumber}"/>
-            <TextBox x:Name="textBoxNumber" Padding="3 3" FontSize="22" TextChanged="textBoxNumber_TextChanged" d:Text="1234"/>
+            <TextBox x:Name="textBoxNumber" Padding="3 3" FontSize="22" TextChanged="textBoxNumber_TextChanged" SelectionChanged="textBoxNumber_SelectionChanged" d:Text="1234"/>
             <Label Content="Examples: 12.345, 123/45, 12.3(45), 1.2345e-7" FontStyle="Italic" Padding="4 1" Opacity="0.7" />
             <Label Content="_Results:" Target="{Binding ElementName=richTextBoxResults}" Margin="0 8 0 0"/>
         </StackPanel>
         <Grid Grid.Row="1">
             <RichTextBox x:Name="richTextBoxNote" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto" FontSize="14" 
-                         Background="{DynamicResource {x:Static SystemColors.InfoBrushKey}}" Foreground="{DynamicResource {x:Static SystemColors.InfoTextBrushKey}}"
                          d:Visibility="Hidden">
                 <FlowDocument >
                     <Paragraph Padding="2 18">
@@ -35,10 +34,10 @@
                          d:Visibility="Hidden">
                 <FlowDocument >
                     <Paragraph>
-                        <Run FontWeight="Bold" Text="⚠ The entered value is invalid."/>
+                        <Run FontWeight="Bold" Text="⚠ The value is invalid."/>
                     </Paragraph>
                     <Paragraph>
-                        <Run Text="Please enter a number or fraction, for example:"/>
+                        <Run Text="Please enter a decimal number or fraction. For example:"/>
                     </Paragraph>
                     <Paragraph Margin="14 0" FontWeight="Bold">
                         <Run Text="0.1234"/>
@@ -71,25 +70,67 @@
                 </FlowDocument>
             </RichTextBox>
 
-            <RichTextBox x:Name="richTextBoxResults" Padding="8" IsReadOnly="True" IsReadOnlyCaretVisible="True" VerticalScrollBarVisibility="Auto" d:Visibility="Hidden" >
+            <RichTextBox x:Name="richTextBoxResults" Padding="4 8 2 2" IsReadOnly="True" IsReadOnlyCaretVisible="True" VerticalScrollBarVisibility="Auto" d:Visibility="Visible" >
+                <RichTextBox.Resources>
+                    <Style TargetType="Paragraph">
+                        <Setter Property="Margin" Value="4"/>
+                        <Setter Property="Padding" Value="0"/>
+                    </Style>
+                </RichTextBox.Resources>
                 <FlowDocument>
-                    <Section x:Name="sectionContinuedFraction" Padding="0" Margin="0">
-                        <Paragraph>
-                            <Run x:Name="runContinuedFraction" FontWeight="Bold" FontSize="22" d:Text="[1; 2, 3, 4]"/>
+                    <Section x:Name="sectionContinuedFraction">
+                        <Paragraph >
+                            <Run Text="Regular continued fraction" FontWeight="Bold"/>
                         </Paragraph>
+                        <Section Padding="10 0" Margin="0">
+                            <Paragraph >
+                                <Run x:Name="runContinuedFraction" FontWeight="Bold" FontSize="22" d:Text="[1; 2, 3, 4]" />
+                            </Paragraph>
+                        </Section>
                     </Section>
-                    <Section x:Name="sectionContinuedFractionRemark" Padding="0" Margin="0">
+
+                    <Section x:Name="sectionDecimal" Padding="0 1 0 0" Margin="0">
                         <Paragraph>
-                            <Run x:Name="runContinuedFractionRemark" d:Text="Remarks"/>
+                            <Run Text="Decimal" FontWeight="Bold"/>
                         </Paragraph>
+                        <Section Padding="12 0">
+                            <Paragraph Padding="0" Margin="0">
+                                <Run x:Name="runDecimal" FontSize="18" d:Text="1 / 2"/>
+                            </Paragraph>
+                        </Section>
                     </Section>
-                    <Paragraph>
-                        <Run Text="Convergents:" FontWeight="Bold"/>
-                    </Paragraph>
-                    <Section Padding="8 0">
+
+                    <Section x:Name="sectionFraction" Padding="0 1 0 0" Margin="0">
                         <Paragraph>
-                            <Run x:Name="runContinuedFractionConvergents" d:Text="0: 1/2=0.5&#10;&#13;1: 7/8=XXX"/>
+                            <Run Text="Simplified fraction" FontWeight="Bold"/>
                         </Paragraph>
+                        <Section Padding="12 0">
+                            <Paragraph Padding="0" Margin="0">
+                                <Run x:Name="runFraction" FontSize="18" d:Text="1 / 2"/>
+                            </Paragraph>
+                        </Section>
+                    </Section>
+
+                    <Section x:Name="sectionContinuedFractionRemark" Padding="0 1 0 0" Margin="0">
+                        <Paragraph>
+                            <Run Text="Remarks" FontWeight="Bold"/>
+                        </Paragraph>
+                        <Section Padding="12 0">
+                            <Paragraph>
+                                <Run x:Name="runContinuedFractionRemark" d:Text="Remarks"/>
+                            </Paragraph>
+                        </Section>
+                    </Section>
+
+                    <Section Padding="0 1 0 0" Margin="0">
+                        <Paragraph>
+                            <Run Text="Convergents" FontWeight="Bold"/>
+                        </Paragraph>
+                        <Section Padding="12 0">
+                            <Paragraph>
+                                <Run x:Name="runContinuedFractionConvergents" d:Text="0: 1/2=0.5&#10;&#13;1: 7/8=XXX"/>
+                            </Paragraph>
+                        </Section>
                     </Section>
                 </FlowDocument>
             </RichTextBox>

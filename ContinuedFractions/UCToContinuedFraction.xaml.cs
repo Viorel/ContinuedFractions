@@ -81,6 +81,13 @@ namespace ContinuedFractions
             RestartCalculationTimer( );
         }
 
+        private void textBoxNumber_SelectionChanged( object sender, RoutedEventArgs e )
+        {
+            if( !mLoaded ) return;
+
+            RestartCalculationTimer( );
+        }
+
         private void CalculationTimer_Tick( object? sender, EventArgs e )
         {
             mCalculationTimer.Stop( );
@@ -309,8 +316,7 @@ namespace ContinuedFractions
 
                 fraction = fraction.Simplify( ctx );
 
-                (BigInteger n, BigInteger d, BigInteger e) = fraction.ToNDE( );
-                n = BigInteger.Abs( n );
+                (BigInteger n, BigInteger d, BigInteger e) = Fraction.Abs( fraction, ctx ).ToNDE( );
 
                 string? error_text = null;
 
@@ -342,6 +348,8 @@ namespace ContinuedFractions
                         [.. ContinuedFractionUtilities
                             .EnumerateContinuedFraction( n, d )
                             .Take( MAX_CONTINUED_FRACTION_ITEMS + 1 )];
+
+                    if( fraction.IsNegative ) continued_fraction_items = ContinuedFractionUtilities.Negate( continued_fraction_items );
 
                     ShowResults( cnc, fraction, continued_fraction_items );
 
@@ -376,8 +384,6 @@ namespace ContinuedFractions
             bool too_long = continued_fraction_items.Length > MAX_CONTINUED_FRACTION_ITEMS;
 
             StringBuilder sb = new( );
-
-            if( initialFraction.IsNegative ) sb.Append( '-' );
 
             sb
                 .Append( "[ " )
@@ -424,9 +430,63 @@ namespace ContinuedFractions
                 ++convergent_number;
             }
 
+            string decimal_string = initialFraction.ToFloatString( cnc, 20 );
+
+            string? fraction_string = null;
+
+            bool is_negative = initialFraction.IsNegative;
+            BigInteger n = BigInteger.Abs( initialFraction.N );
+            BigInteger d = initialFraction.D;
+            BigInteger e = initialFraction.E;
+
+            while( e < 0 )
+            {
+                d *= 10;
+                ++e;
+
+                if( d.GetByteCount( ) > MAX_BIGINTEGER_BYTE_SIZE )
+                {
+                    fraction_string = "The number exceeds the supported limits.";
+
+                    break;
+                }
+            }
+
+            if( fraction_string == null )
+            {
+                while( e > 0 )
+                {
+                    n *= 10;
+                    --e;
+
+                    if( n.GetByteCount( ) > MAX_BIGINTEGER_BYTE_SIZE )
+                    {
+                        fraction_string = "The number exceeds the supported limits.";
+
+                        break;
+                    }
+                }
+            }
+
+            if( fraction_string == null )
+            {
+                if( !initialFraction.IsNormal )
+                {
+                    fraction_string = initialFraction.ToRationalString( cnc, 20 ); // 
+                }
+                else
+                {
+                    fraction_string = $"{( is_negative ? -n : n ):D}";
+                    if( !e.IsZero ) fraction_string = $"{fraction_string}e{( e >= 0 ? "+" : "" )}{e:D}";
+                    if( !d.IsOne ) fraction_string = $"{fraction_string} / {d:D}";
+                }
+            }
+
             Dispatcher.BeginInvoke( ( ) =>
             {
                 runContinuedFraction.Text = sb.ToString( );
+                runDecimal.Text = decimal_string;
+                runFraction.Text = fraction_string;
                 runContinuedFractionRemark.Text = remarks;
                 if( string.IsNullOrWhiteSpace( remarks ) )
                 {
@@ -542,6 +602,9 @@ namespace ContinuedFractions
             case ProgressStatusEnum.DelayToHide:
                 labelPleaseWait.Visibility = Visibility.Hidden;
                 mProgressShownTime = DateTime.MinValue;
+                break;
+            case ProgressStatusEnum.None:
+                //
                 break;
             default:
                 Debug.Assert( false );
