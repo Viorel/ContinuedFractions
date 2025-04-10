@@ -487,16 +487,16 @@ namespace ContinuedFractions
                 runContinuedFraction.Text = sb.ToString( );
                 runDecimal.Text = decimal_string;
                 runFraction.Text = fraction_string;
-                runContinuedFractionRemark.Text = remarks;
+                runRemarks.Text = remarks;
                 if( string.IsNullOrWhiteSpace( remarks ) )
                 {
-                    UIUtilities.ShowTopBlock( false, richTextBoxResults.Document, sectionContinuedFraction, sectionContinuedFractionRemark );
+                    UIUtilities.ShowTopBlock( richTextBoxResults.Document, sectionContinuedFractionRemark, false, sectionContinuedFraction );
                 }
                 else
                 {
-                    UIUtilities.ShowTopBlock( true, richTextBoxResults.Document, sectionContinuedFraction, sectionContinuedFractionRemark );
+                    UIUtilities.ShowTopBlock( richTextBoxResults.Document, sectionContinuedFractionRemark, true, sectionContinuedFraction );
                 }
-                runContinuedFractionConvergents.Text = sb_convergents.ToString( );
+                runConvergents.Text = sb_convergents.ToString( );
 
                 ShowOneRichTextBox( richTextBoxResults );
             } );

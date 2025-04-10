@@ -9,9 +9,9 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="1*" MinHeight="80"/>
+            <RowDefinition Height="35*" MinHeight="80"/>
             <RowDefinition Height="5"/>
-            <RowDefinition Height="1*" MinHeight="80"/>
+            <RowDefinition Height="65*" MinHeight="80"/>
         </Grid.RowDefinitions>
 
         <Grid Grid.Column="0" Grid.Row="0" Margin="0 0 0 8">
@@ -96,47 +96,71 @@
                 </RichTextBox>
 
                 <RichTextBox x:Name="richTextBoxResults" Padding="8" IsReadOnly="True" IsReadOnlyCaretVisible="True" VerticalScrollBarVisibility="Auto" d:Visibility="Visible">
-                    <FlowDocument>
-                        <Table CellSpacing="0">
-                            <Table.Columns>
-                                <TableColumn Width="100"/>
-                                <TableColumn/>
-                            </Table.Columns>
-                            <TableRowGroup>
-                                <TableRow>
-                                    <TableCell>
-                                        <Paragraph TextAlignment="Right" Padding="0 5 0 0">
-                                            Decimal number:
-                                        </Paragraph>
-                                    </TableCell>
-                                    <TableCell>
-                                        <Paragraph Padding="8 0">
-                                            <Run x:Name="runResultAsDecimal" FontWeight="Bold" FontSize="18" d:Text="12.345"/>
-                                        </Paragraph>
-                                    </TableCell>
-                                </TableRow>
-                                <TableRow>
-                                    <TableCell>
-                                        <Paragraph TextAlignment="Right" Padding="0 5 0 0">
-                                            Fraction:
-                                        </Paragraph>
-                                    </TableCell>
-                                    <TableCell>
-                                        <Paragraph Padding="8 0">
-                                            <Run x:Name="runResultAsFraction" FontWeight="Bold" FontSize="18" d:Text="12/345"/>
-                                        </Paragraph>
-                                    </TableCell>
-                                </TableRow>
-                            </TableRowGroup>
-                        </Table>
+                    <RichTextBox.Resources>
+                        <Style TargetType="Paragraph">
+                            <Setter Property="Margin" Value="4"/>
+                            <Setter Property="Padding" Value="0"/>
+                        </Style>
+                    </RichTextBox.Resources>
 
-                        <Paragraph>
-                            <Run Text="Convergents:" FontWeight="Bold"/>
-                        </Paragraph>
-                        <Section Padding="8 0">
-                            <Paragraph>
-                                <Run x:Name="runResultConvergents" d:Text="0: 1/2=0.5&#10;&#13;1: 7/8=XXX"/>
+                    <FlowDocument>
+                        <Section x:Name="sectionDecimal">
+                            <Paragraph >
+                                <Run Text="Decimal number" FontWeight="Bold"/>
                             </Paragraph>
+                            <Section Padding="10 0" Margin="0">
+                                <Paragraph >
+                                    <Run x:Name="runDecimal" FontWeight="Bold" FontSize="22" d:Text="12.345" />
+                                </Paragraph>
+                            </Section>
+                        </Section>
+
+                        <Section x:Name="sectionFraction" Padding="0 1 0 0" Margin="0">
+                            <Paragraph>
+                                <Run Text="Fraction" FontWeight="Bold"/>
+                            </Paragraph>
+                            <Section Padding="12 0">
+                                <Paragraph Padding="0" Margin="0">
+                                    <Run x:Name="runFraction" FontSize="18" d:Text="1 / 2"/>
+                                </Paragraph>
+                            </Section>
+                        </Section>
+
+                        <Section x:Name="sectionInfo" Padding="0 1 0 0" Margin="0">
+                            <Paragraph Padding="0 8 0 0" >
+                                <!-- ℹⓘ -->
+                                <Run Text="ℹ"/>
+                                <Run Text="The entered continued fraction is regular."/>
+                            </Paragraph>
+                        </Section>
+
+                        <Section x:Name="sectionWarning" Padding="0 1 0 0" Margin="0">
+                            <Paragraph Padding="0 8 0 0" >
+                                <Run Text="⚠️"/>
+                                <Run Text="The entered continued fraction is not regular normalized."/>
+                            </Paragraph>
+                        </Section>
+
+                        <Section x:Name="sectionCorrected" Padding="0 1 0 0" Margin="0">
+                            <Paragraph>
+                                <Run Text="Corrected regular continued fraction" FontWeight="Bold"/>
+                            </Paragraph>
+                            <Section Padding="12 0">
+                                <Paragraph Padding="0" Margin="0">
+                                    <Run x:Name="runCorrected" FontSize="18" d:Text="1 / 2"/>
+                                </Paragraph>
+                            </Section>
+                        </Section>
+
+                        <Section Padding="0 1 0 0" Margin="0">
+                            <Paragraph>
+                                <Run x:Name="runConvergentsTitle" Text="Convergents" FontWeight="Bold"/>
+                            </Paragraph>
+                            <Section Padding="12 0">
+                                <Paragraph>
+                                    <Run x:Name="runConvergents" d:Text="0: 1/2=0.5&#10;&#13;1: 7/8=XXX"/>
+                                </Paragraph>
+                            </Section>
                         </Section>
                     </FlowDocument>
                 </RichTextBox>

@@ -117,7 +117,7 @@
                         </Paragraph>
                         <Section Padding="12 0">
                             <Paragraph>
-                                <Run x:Name="runContinuedFractionRemark" d:Text="Remarks"/>
+                                <Run x:Name="runRemarks" d:Text="Remarks"/>
                             </Paragraph>
                         </Section>
                     </Section>
@@ -128,7 +128,7 @@
                         </Paragraph>
                         <Section Padding="12 0">
                             <Paragraph>
-                                <Run x:Name="runContinuedFractionConvergents" d:Text="0: 1/2=0.5&#10;&#13;1: 7/8=XXX"/>
+                                <Run x:Name="runConvergents" d:Text="0: 1/2=0.5&#10;&#13;1: 7/8=XXX"/>
                             </Paragraph>
                         </Section>
                     </Section>

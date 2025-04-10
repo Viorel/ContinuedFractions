@@ -25,6 +25,7 @@ namespace ContinuedFractions
     /// </summary>
     public partial class UCFromContinuedFraction : UserControl
     {
+        const int MAX_CONTINUED_FRACTION_ITEMS = 100;
         const int MAX_BIGINTEGER_BYTE_SIZE = 128;
         readonly TimeSpan DELAY_BEFORE_CALCULATION = TimeSpan.FromMilliseconds( 333 );
         readonly TimeSpan DELAY_BEFORE_PROGRESS = TimeSpan.FromMilliseconds( 333 );
@@ -226,17 +227,49 @@ namespace ContinuedFractions
         {
             try
             {
+                CalculationContext ctx = new( cnc, 33 );
+
                 Fraction[] convergents =
                     ContinuedFractionUtilities
                         .EnumerateContinuedFractionConvergents( continuedFraction )
-                        .Select( p => new Fraction( p.n, p.d ) )
+                        .Select( p =>
+                                    p.d.IsZero ? p.n < 0 ? Fraction.NegativeInfinity : p.n > 0 ? Fraction.PositiveInfinity : Fraction.Undefined
+                                    : new Fraction( p.d < 0 ? -p.n : p.n, BigInteger.Abs( p.d ) )
+                                )
                         .ToArray( );
+
+                IReadOnlyList<BigInteger>? corrected_regular_continued_fraction = null;
+
+                Fraction result = convergents.Last( );
+                result = result.Simplify( ctx );
+
+                if( result.IsNormal )
+                {
+                    Debug.Assert( result.E.IsZero );
+
+                    BigInteger[] continued_fraction_items =
+                        [.. ContinuedFractionUtilities
+                            .EnumerateContinuedFraction( BigInteger.Abs(result.N), result.D )
+                            .Take( MAX_CONTINUED_FRACTION_ITEMS + 1 )];
+
+                    if( continued_fraction_items.Length < MAX_CONTINUED_FRACTION_ITEMS )
+                    {
+                        if( result.IsNegative ) continued_fraction_items = ContinuedFractionUtilities.Negate( continued_fraction_items );
+
+                        bool is_not_regular = !continued_fraction_items.SequenceEqual( continuedFraction );
+
+                        if( is_not_regular )
+                        {
+                            corrected_regular_continued_fraction = continued_fraction_items;
+                        }
+                    }
+                }
 
                 string? error_text = null;
 
                 if( error_text == null )
                 {
-                    ShowResults( cnc, convergents );
+                    ShowResults( cnc, result, convergents, corrected_regular_continued_fraction );
 
                     HideProgress( );
                 }
@@ -262,12 +295,9 @@ namespace ContinuedFractions
             }
         }
 
-        void ShowResults( ICancellable cnc, Fraction[] convergents )
+        void ShowResults( ICancellable cnc, Fraction result, Fraction[] convergents, IReadOnlyList<BigInteger>? correctedRegularContinuedFraction )
         {
-            CalculationContext ctx = new( cnc, 33 );
-
-            Fraction result = convergents.Last( );
-            result = result.Simplify( ctx );
+            bool is_corrected = correctedRegularContinuedFraction != null;
 
             string result_as_decimal = result.ToFloatString( cnc, 20 );
 
@@ -292,35 +322,87 @@ namespace ContinuedFractions
                 if( n.GetByteCount( ) > MAX_BIGINTEGER_BYTE_SIZE ) throw new ApplicationException( "The number exceeds the supported limits." );
             }
 
-            string result_as_fraction = $"{( is_negative ? -n : n ):D}";
-            if( !e.IsZero ) result_as_fraction = $"{result_as_fraction}e{( e >= 0 ? "+" : "" )}{e:D}";
-            if( !d.IsOne ) result_as_fraction = $"{result_as_fraction} / {d:D}";
+            string result_as_fraction;
+
+            if( !result.IsNormal )
+            {
+                result_as_fraction = result.ToRationalString( cnc, 20 ); // 
+            }
+            else
+            {
+                result_as_fraction = $"{( is_negative ? -n : n ):D}";
+                if( !e.IsZero ) result_as_fraction = $"{result_as_fraction}e{( e >= 0 ? "+" : "" )}{e:D}";
+                if( !d.IsOne ) result_as_fraction = $"{result_as_fraction} / {d:D}";
+            }
 
             StringBuilder sb_convergents = new( );
+            string convergents_title;
 
             int convergent_number = 0;
             foreach( Fraction f in convergents )
             {
-                Debug.Assert( f.E == 0 );
-
-                string fs = f.ToFloatString( cnc, 20 );
-                bool fsa = fs.Contains( '≈' );
-                fs = fs.Replace( "≈", "" );
-
                 sb_convergents
-                    .AppendLine( $"{convergent_number.ToString( ).PadLeft( 2, '\u2007' )}:\u2007{f.N:D} / {f.D:D} {( fsa ? '≈' : '=' )} {fs}" );
+                    .Append( $"{convergent_number.ToString( ).PadLeft( 2, '\u2007' )}:\u2007" );
+
+                if( !f.IsNormal )
+                {
+                    sb_convergents
+                        .AppendLine( f.ToRationalString( cnc, 20 ) );
+                }
+                else
+                {
+                    Debug.Assert( f.E == 0 );
+
+                    string fs = f.ToFloatString( cnc, 20 );
+                    bool fsa = fs.Contains( '≈' );
+                    fs = fs.Replace( "≈", "" );
+                    sb_convergents
+                        .AppendLine( $"{f.N:D} / {f.D:D} {( fsa ? '≈' : '=' )} {fs}" );
+                }
 
                 ++convergent_number;
             }
 
-            Dispatcher.BeginInvoke( ( ) =>
-            {
-                runResultAsDecimal.Text = result_as_decimal;
-                runResultAsFraction.Text = result_as_fraction;
-                runResultConvergents.Text = sb_convergents.ToString( );
+            StringBuilder sb_corrected = new( );
 
-                ShowOneRichTextBox( richTextBoxResults );
-            } );
+            if( is_corrected )
+            {
+                convergents_title = "Convergents of entered continued fraction";
+
+                sb_corrected
+                    .Append( "[ " )
+                    .Append( correctedRegularContinuedFraction[0].ToString( "D" ) );
+
+                for( int i = 1; i < correctedRegularContinuedFraction.Count; i++ )
+                {
+                    var item = correctedRegularContinuedFraction[i];
+
+                    sb_corrected
+                        .Append( i == 1 ? "; " : ", " )
+                        .Append( item.ToString( "D" ) );
+                }
+
+                sb_corrected.Append( " ]" );
+            }
+            else
+            {
+                convergents_title = "Convergents";
+            }
+
+            Dispatcher.BeginInvoke( ( ) =>
+                {
+                    runDecimal.Text = result_as_decimal;
+                    runFraction.Text = result_as_fraction;
+                    runCorrected.Text = sb_corrected.ToString( );
+                    runConvergents.Text = sb_convergents.ToString( );
+                    runConvergentsTitle.Text = convergents_title;
+
+                    UIUtilities.ShowTopBlock( richTextBoxResults.Document, sectionInfo, !is_corrected, sectionFraction );
+                    UIUtilities.ShowTopBlock( richTextBoxResults.Document, sectionWarning, is_corrected, sectionFraction );
+                    UIUtilities.ShowTopBlock( richTextBoxResults.Document, sectionCorrected, is_corrected, sectionFraction, sectionWarning );
+
+                    ShowOneRichTextBox( richTextBoxResults );
+                } );
         }
 
         void ShowError( string errorText )
@@ -424,6 +506,9 @@ namespace ContinuedFractions
                 labelPleaseWait.Visibility = Visibility.Hidden;
                 mProgressShownTime = DateTime.MinValue;
                 break;
+            case ProgressStatusEnum.None:
+                //
+                break;
             default:
                 Debug.Assert( false );
                 break;
@@ -438,7 +523,7 @@ namespace ContinuedFractions
             (?xni)
             ^
             \s* \[? \s*
-            (?<first>\d+) (\s* ([,;]|\s+) \s* (?<next>\d+))* [,;]?
+            (?<first>[\-\+]?\d+) (\s* ([,;]|\s+) \s* (?<next>[\-\+]?\d+))* [,;]?
             \s* \]? \s*
             $
             """, RegexOptions.IgnorePatternWhitespace
