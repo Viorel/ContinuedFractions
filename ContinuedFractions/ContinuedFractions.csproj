@@ -6,7 +6,15 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+    <ApplicationIcon>ContinuedFractions.ico</ApplicationIcon>
+    <PackageIcon>ContinuedFractions.ico</PackageIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="ContinuedFractions.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\ContinuedFractionsLibrary\ContinuedFractionsLibrary.csproj" />
@@ -21,6 +29,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="ContinuedFractions.ico">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
     <None Update="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

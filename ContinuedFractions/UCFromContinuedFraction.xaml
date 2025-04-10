@@ -23,7 +23,7 @@
 
             <Label Grid.Row="0" Content="Continued fraction:" Target="{Binding ElementName=textBoxContinuedFraction}"/>
 
-            <TextBox Grid.Row="1" x:Name="textBoxContinuedFraction" Padding="3 3" FontSize="22" TextChanged="textBoxContinuedFraction_TextChanged"
+            <TextBox Grid.Row="1" x:Name="textBoxContinuedFraction" Padding="3 3" FontSize="22" TextChanged="textBoxContinuedFraction_TextChanged" SelectionChanged="textBoxContinuedFraction_SelectionChanged"
                  d:Text="[1; 2, 3, 4 ]" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"/>
 
             <Label Grid.Row="2" Opacity="0.7">
@@ -129,7 +129,7 @@
                         <Section x:Name="sectionInfo" Padding="0 1 0 0" Margin="0">
                             <Paragraph Padding="0 8 0 0" >
                                 <!-- ℹⓘ -->
-                                <Run Text="ℹ"/>
+                                <!--<Run Text="ℹ"/>-->
                                 <Run Text="The entered continued fraction is regular."/>
                             </Paragraph>
                         </Section>
@@ -137,7 +137,7 @@
                         <Section x:Name="sectionWarning" Padding="0 1 0 0" Margin="0">
                             <Paragraph Padding="0 8 0 0" >
                                 <Run Text="⚠️"/>
-                                <Run Text="The entered continued fraction is not regular normalized."/>
+                                <Run Text="The entered continued fraction is not normalized."/>
                             </Paragraph>
                         </Section>
 

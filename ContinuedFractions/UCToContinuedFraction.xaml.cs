@@ -29,8 +29,8 @@ namespace ContinuedFractions
     {
         const int MAX_CONTINUED_FRACTION_ITEMS = 100;
         const int MAX_BIGINTEGER_BYTE_SIZE = 128;
-        readonly TimeSpan DELAY_BEFORE_CALCULATION = TimeSpan.FromMilliseconds( 333 );
-        readonly TimeSpan DELAY_BEFORE_PROGRESS = TimeSpan.FromMilliseconds( 333 );
+        readonly TimeSpan DELAY_BEFORE_CALCULATION = TimeSpan.FromMilliseconds( 444 );
+        readonly TimeSpan DELAY_BEFORE_PROGRESS = TimeSpan.FromMilliseconds( 455 ); // (must be greater than 'DELAY_BEFORE_CALCULATION')
         readonly TimeSpan MIN_DURATION_PROGRESS = TimeSpan.FromMilliseconds( 444 );
 
         bool mLoaded = false;
@@ -85,7 +85,7 @@ namespace ContinuedFractions
         {
             if( !mLoaded ) return;
 
-            RestartCalculationTimer( );
+            PostponeCalculationTimer( );
         }
 
         private void CalculationTimer_Tick( object? sender, EventArgs e )
@@ -100,6 +100,11 @@ namespace ContinuedFractions
             mCalculationTimer.Stop( );
             mCalculationTimer.Start( );
             ShowProgress( );
+        }
+
+        void PostponeCalculationTimer( )
+        {
+            if( mCalculationTimer.IsEnabled ) RestartCalculationTimer( );
         }
 
         void ApplySavedData( )
@@ -521,11 +526,14 @@ namespace ContinuedFractions
 
         void ShowOneRichTextBox( RichTextBox richTextBox )
         {
+            bool was_visible = richTextBox.Visibility == Visibility.Visible;
+
             richTextBoxNote.Visibility = Visibility.Hidden;
             richTextBoxTypicalError.Visibility = Visibility.Hidden;
             richTextBoxError.Visibility = Visibility.Hidden;
             richTextBoxResults.Visibility = Visibility.Hidden;
 
+            if( !was_visible ) richTextBox.ScrollToHome( );
             richTextBox.Visibility = Visibility.Visible;
         }
 
