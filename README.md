@@ -1,7 +1,7 @@
 # Continued Fractions
 
-An experimental tool to convert decimal numbers and fractions to continued fractions, and vice versa.
-Thr program also display the convergents and converts the simple continued fractions to regular ones.
+An experimental tool that converts decimal numbers and fractions to continued fractions, and vice versa.
+The program also displays the convergents, and converts the simple continued fractions to regular ones.
 
 For example:
 
@@ -46,14 +46,12 @@ The program runs in this environment:
 * Windows 11 or Windows 10 (64-bit),
 * .NET 9.
 
-Download and unzip the latest archive from the **Releases** section. Launch the **ContinuedFractions** executable.
+To use it, download and unzip the latest archive from the **Releases** section. Launch the **ContinuedFractions** executable.
 
 Alternatively, the source files, which are got from the **Releases** section too, can be compiled in Visual Studio 2022
 that includes the “.NET desktop development” workload. The program is made in C#, WPF.
-
 
 ### References
 
 * Dr Ron Knott, *An introduction to Continued Fractions* — https://r-knott.surrey.ac.uk/Fibonacci/cfINTRO.html
 * Conrad, K\., *Negation and Inversion of Continued Fractions* — https://kconrad.math.uconn.edu/blurbs/ugradnumthy/contfrac-neg-invert.pdf
-
