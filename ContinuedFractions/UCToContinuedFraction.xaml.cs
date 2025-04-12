@@ -187,10 +187,10 @@ namespace ContinuedFractions
             }
             catch( Exception exc )
             {
-                if( Debugger.IsAttached ) Debugger.Break( );
+                //if( Debugger.IsAttached ) Debugger.Break( );
 
                 string error_text = $"Something went wrong.\r\n\r\n{exc.Message}";
-                if( Debugger.IsAttached ) error_text = $"{error_text}\r\n{exc.StackTrace}";
+                if( Debugger.IsAttached ) error_text = $"{error_text}\r\n\r\n{exc.StackTrace}";
 
                 ShowError( error_text );
             }
@@ -285,14 +285,30 @@ namespace ContinuedFractions
                 BigInteger exponent = exponent_group.Success ? BigInteger.Parse( exponent_group.Value, CultureInfo.InvariantCulture ) : BigInteger.Zero;
                 if( is_exponent_negative ) exponent = -exponent;
 
-                if( denominator.IsZero )
+                Fraction fraction;
+
+                if( nominator.IsZero )
                 {
-                    ShowError( "Denominator cannot be zero." );
-
-                    return null;
+                    if( denominator.IsZero )
+                    {
+                        fraction = Fraction.Undefined;
+                    }
+                    else
+                    {
+                        fraction = Fraction.Zero;
+                    }
                 }
-
-                var fraction = new Fraction( is_negative ? -nominator : nominator, denominator, exponent );
+                else
+                {
+                    if( denominator.IsZero )
+                    {
+                        fraction = is_negative ? Fraction.NegativeInfinity : Fraction.PositiveInfinity;
+                    }
+                    else
+                    {
+                        fraction = new Fraction( is_negative ? -nominator : nominator, denominator, exponent );
+                    }
+                }
 
                 return fraction;
             }
@@ -317,53 +333,60 @@ namespace ContinuedFractions
         {
             try
             {
-                CalculationContext ctx = new( cnc, 33 );
-
-                fraction = fraction.Simplify( ctx );
-
-                (BigInteger n, BigInteger d, BigInteger e) = Fraction.Abs( fraction, ctx ).ToNDE( );
-
-                string? error_text = null;
-
-                while( error_text == null && e < 0 )
+                if( !fraction.IsNormal )
                 {
-                    d *= 10;
-                    ++e;
-
-                    if( d.GetByteCount( ) > MAX_BIGINTEGER_BYTE_SIZE )
-                    {
-                        error_text = "The number exceeds the supported limits.";
-                    }
+                    ShowResults( cnc, fraction, [] );
+                    HideProgress( );
                 }
-
-                while( error_text == null && e > 0 )
+                else
                 {
-                    n *= 10;
-                    --e;
+                    CalculationContext ctx = new( cnc, 33 );
 
-                    if( n.GetByteCount( ) > MAX_BIGINTEGER_BYTE_SIZE )
+                    fraction = fraction.Simplify( ctx );
+
+                    (BigInteger n, BigInteger d, BigInteger e) = Fraction.Abs( fraction, ctx ).ToNDE( );
+
+                    string? error_text = null;
+
+                    while( error_text == null && e < 0 )
                     {
-                        error_text = "The number exceeds the supported limits.";
-                    }
-                }
+                        d *= 10;
+                        ++e;
 
-                if( error_text == null )
-                {
-                    BigInteger[] continued_fraction_items =
-                        [.. ContinuedFractionUtilities
+                        if( d.GetByteCount( ) > MAX_BIGINTEGER_BYTE_SIZE )
+                        {
+                            error_text = "The number exceeds the supported limits.";
+                        }
+                    }
+
+                    while( error_text == null && e > 0 )
+                    {
+                        n *= 10;
+                        --e;
+
+                        if( n.GetByteCount( ) > MAX_BIGINTEGER_BYTE_SIZE )
+                        {
+                            error_text = "The number exceeds the supported limits.";
+                        }
+                    }
+
+                    if( error_text == null )
+                    {
+                        BigInteger[] continued_fraction_items =
+                            [.. ContinuedFractionUtilities
                             .EnumerateContinuedFraction( n, d )
                             .Take( MAX_CONTINUED_FRACTION_ITEMS + 1 )];
 
-                    if( fraction.IsNegative ) continued_fraction_items = ContinuedFractionUtilities.Negate( continued_fraction_items );
+                        if( fraction.IsNegative ) continued_fraction_items = ContinuedFractionUtilities.Negate( continued_fraction_items );
 
-                    ShowResults( cnc, fraction, continued_fraction_items );
+                        ShowResults( cnc, fraction, continued_fraction_items );
+                        HideProgress( );
+                    }
 
-                    HideProgress( );
-                }
-
-                if( !string.IsNullOrEmpty( error_text ) )
-                {
-                    ShowError( error_text );
+                    if( !string.IsNullOrEmpty( error_text ) )
+                    {
+                        ShowError( error_text );
+                    }
                 }
             }
             catch( OperationCanceledException ) // also 'TaskCanceledException'
@@ -373,10 +396,10 @@ namespace ContinuedFractions
             }
             catch( Exception exc )
             {
-                if( Debugger.IsAttached ) Debugger.Break( );
+                //if( Debugger.IsAttached ) Debugger.Break( );
 
                 string error_text = $"Something went wrong.\r\n\r\n{exc.Message}";
-                if( Debugger.IsAttached ) error_text = $"{error_text}\r\n{exc.StackTrace}";
+                if( Debugger.IsAttached ) error_text = $"{error_text}\r\n\r\n{exc.StackTrace}";
 
                 ShowError( error_text );
             }
@@ -384,112 +407,100 @@ namespace ContinuedFractions
 
         void ShowResults( ICancellable cnc, Fraction initialFraction, BigInteger[] continued_fraction_items )
         {
-            if( continued_fraction_items.Length <= 0 ) throw new ApplicationException( "The continued fraction is empty." );
+            StringBuilder sb_continued_fraction = new( );
+            string decimal_string;
+            string? fraction_string;
+            string remarks;
+            StringBuilder sb_convergents = new( );
 
-            bool too_long = continued_fraction_items.Length > MAX_CONTINUED_FRACTION_ITEMS;
-
-            StringBuilder sb = new( );
-
-            sb
-                .Append( "[ " )
-                .Append( continued_fraction_items[0].ToString( "D" ) );
-
-            for( int i = 1; i < Math.Min( continued_fraction_items.Length, MAX_CONTINUED_FRACTION_ITEMS ); i++ )
+            if( !initialFraction.IsNormal )
             {
-                var item = continued_fraction_items[i];
-
-                sb
-                    .Append( i == 1 ? "; " : ", " )
-                    .Append( item.ToString( "D" ) );
-            }
-
-            if( too_long )
-            {
-                sb.Append( " ... ]" );
+                sb_continued_fraction.Append( "Undefined" );
+                decimal_string = initialFraction.ToFloatString( cnc, 33 );
+                fraction_string = initialFraction.ToRationalString( cnc, 33 );
+                remarks = "⚠ The entered value is not a number.";
+                sb_convergents.Append( "—\r\n" );
             }
             else
             {
-                sb.Append( " ]" );
-            }
+                if( continued_fraction_items.Length <= 0 ) throw new ApplicationException( "The continued fraction is empty." );
 
-            string remarks = "";
+                remarks = "";
 
-            if( too_long )
-            {
-                remarks = $"{remarks}⚠ The continued fraction is too long.";
-            }
+                bool too_long = continued_fraction_items.Length > MAX_CONTINUED_FRACTION_ITEMS;
 
-            StringBuilder sb_convergents = new( );
+                sb_continued_fraction
+                    .Append( "[ " )
+                    .Append( continued_fraction_items[0].ToString( "D" ) );
 
-            int convergent_number = 0;
-            foreach( (BigInteger n, BigInteger d) p in ContinuedFractionUtilities.EnumerateContinuedFractionConvergents( continued_fraction_items ) )
-            {
-                Fraction f = new( p.n, p.d );
-                string fs = f.ToFloatString( cnc, 20 );
-                bool fsa = fs.Contains( '≈' );
-                fs = fs.Replace( "≈", "" );
-
-                sb_convergents
-                    .AppendLine( $"{convergent_number.ToString( ).PadLeft( 2, '\u2007' )}:\u2007{p.n:D} / {p.d:D} {( fsa ? '≈' : '=' )} {fs}" );
-
-                ++convergent_number;
-            }
-
-            string decimal_string = initialFraction.ToFloatString( cnc, 20 );
-
-            string? fraction_string = null;
-
-            bool is_negative = initialFraction.IsNegative;
-            BigInteger n = BigInteger.Abs( initialFraction.N );
-            BigInteger d = initialFraction.D;
-            BigInteger e = initialFraction.E;
-
-            while( e < 0 )
-            {
-                d *= 10;
-                ++e;
-
-                if( d.GetByteCount( ) > MAX_BIGINTEGER_BYTE_SIZE )
+                for( int i = 1; i < Math.Min( continued_fraction_items.Length, MAX_CONTINUED_FRACTION_ITEMS ); i++ )
                 {
-                    fraction_string = "The number exceeds the supported limits.";
+                    var item = continued_fraction_items[i];
 
-                    break;
+                    sb_continued_fraction
+                        .Append( i == 1 ? "; " : ", " )
+                        .Append( item.ToString( "D" ) );
                 }
-            }
 
-            if( fraction_string == null )
-            {
+                if( too_long )
+                {
+                    sb_continued_fraction.Append( " ... ]" );
+                }
+                else
+                {
+                    sb_continued_fraction.Append( " ]" );
+                }
+
+                if( too_long )
+                {
+                    remarks = $"{remarks}⚠ The continued fraction is too long.";
+                }
+
+                int convergent_number = 0;
+                foreach( (BigInteger n, BigInteger d) p in ContinuedFractionUtilities.EnumerateContinuedFractionConvergents( continued_fraction_items ) )
+                {
+                    Fraction f = new( p.n, p.d );
+                    string fs = f.ToFloatString( cnc, 20 );
+                    bool fsa = fs.Contains( '≈' );
+                    fs = fs.Replace( "≈", "" );
+
+                    sb_convergents
+                        .AppendLine( $"{convergent_number.ToString( ).PadLeft( 2, '\u2007' )}:\u2007{p.n:D} / {p.d:D} {( fsa ? '≈' : '=' )} {fs}" );
+
+                    ++convergent_number;
+                }
+
+                decimal_string = initialFraction.ToFloatString( cnc, 20 );
+
+                bool is_negative = initialFraction.IsNegative;
+                BigInteger n = BigInteger.Abs( initialFraction.N );
+                BigInteger d = initialFraction.D;
+                BigInteger e = initialFraction.E;
+
+                while( e < 0 )
+                {
+                    d *= 10;
+                    ++e;
+
+                    if( d.GetByteCount( ) > MAX_BIGINTEGER_BYTE_SIZE ) throw new ApplicationException( "The number exceeds the supported limits." );
+                }
+
                 while( e > 0 )
                 {
                     n *= 10;
                     --e;
 
-                    if( n.GetByteCount( ) > MAX_BIGINTEGER_BYTE_SIZE )
-                    {
-                        fraction_string = "The number exceeds the supported limits.";
+                    if( n.GetByteCount( ) > MAX_BIGINTEGER_BYTE_SIZE ) throw new ApplicationException( "The number exceeds the supported limits." );
+                }
 
-                        break;
-                    }
-                }
-            }
-
-            if( fraction_string == null )
-            {
-                if( !initialFraction.IsNormal )
-                {
-                    fraction_string = initialFraction.ToRationalString( cnc, 20 ); // 
-                }
-                else
-                {
-                    fraction_string = $"{( is_negative ? -n : n ):D}";
-                    if( !e.IsZero ) fraction_string = $"{fraction_string}e{( e >= 0 ? "+" : "" )}{e:D}";
-                    if( !d.IsOne ) fraction_string = $"{fraction_string} / {d:D}";
-                }
+                fraction_string = $"{( is_negative ? -n : n ):D}";
+                if( !e.IsZero ) fraction_string = $"{fraction_string}e{( e >= 0 ? "+" : "" )}{e:D}";
+                if( !d.IsOne ) fraction_string = $"{fraction_string} / {d:D}";
             }
 
             Dispatcher.BeginInvoke( ( ) =>
             {
-                runContinuedFraction.Text = sb.ToString( );
+                runContinuedFraction.Text = sb_continued_fraction.ToString( );
                 runDecimal.Text = decimal_string;
                 runFraction.Text = fraction_string;
                 runRemarks.Text = remarks;

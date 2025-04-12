@@ -185,10 +185,10 @@ namespace ContinuedFractions
             }
             catch( Exception exc )
             {
-                if( Debugger.IsAttached ) Debugger.Break( );
+                //if( Debugger.IsAttached ) Debugger.Break( );
 
                 string error_text = $"Something went wrong.\r\n\r\n{exc.Message}";
-                if( Debugger.IsAttached ) error_text = $"{error_text}\r\n{exc.StackTrace}";
+                if( Debugger.IsAttached ) error_text = $"{error_text}\r\n\r\n{exc.StackTrace}";
 
                 ShowError( error_text );
             }
@@ -260,7 +260,27 @@ namespace ContinuedFractions
 
                 if( result.IsNormal )
                 {
-                    Debug.Assert( result.E.IsZero );
+                    BigInteger n = BigInteger.Abs( result.N );
+                    BigInteger d = result.D;
+                    BigInteger e = result.E;
+
+                    while( e < 0 )
+                    {
+                        d *= 10;
+                        ++e;
+
+                        if( d.GetByteCount( ) > MAX_BIGINTEGER_BYTE_SIZE ) throw new ApplicationException( "The number exceeds the supported limits." );
+                    }
+
+                    while( e > 0 )
+                    {
+                        n *= 10;
+                        --e;
+
+                        if( n.GetByteCount( ) > MAX_BIGINTEGER_BYTE_SIZE ) throw new ApplicationException( "The number exceeds the supported limits." );
+                    }
+
+                    Debug.Assert( e.IsZero );
 
                     BigInteger[] continued_fraction_items =
                         [.. ContinuedFractionUtilities
@@ -301,10 +321,10 @@ namespace ContinuedFractions
             }
             catch( Exception exc )
             {
-                if( Debugger.IsAttached ) Debugger.Break( );
+                //if( Debugger.IsAttached ) Debugger.Break( );
 
                 string error_text = $"Something went wrong.\r\n\r\n{exc.Message}";
-                if( Debugger.IsAttached ) error_text = $"{error_text}\r\n{exc.StackTrace}";
+                if( Debugger.IsAttached ) error_text = $"{error_text}\r\n\r\n{exc.StackTrace}";
 
                 ShowError( error_text );
             }
@@ -337,6 +357,8 @@ namespace ContinuedFractions
 
                 if( n.GetByteCount( ) > MAX_BIGINTEGER_BYTE_SIZE ) throw new ApplicationException( "The number exceeds the supported limits." );
             }
+
+            Debug.Assert( e.IsZero );
 
             string result_as_fraction;
 
