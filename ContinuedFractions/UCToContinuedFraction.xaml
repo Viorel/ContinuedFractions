@@ -80,7 +80,7 @@
                         <Paragraph >
                             <Run Text="Regular continued fraction" FontWeight="Bold"/>
                         </Paragraph>
-                        <Section Padding="10 0" Margin="0">
+                        <Section Padding="9 0" Margin="0">
                             <Paragraph >
                                 <Run x:Name="runContinuedFraction" FontWeight="Bold" FontSize="22" d:Text="[1; 2, 3, 4]" />
                             </Paragraph>
@@ -110,12 +110,12 @@
                     </Section>
 
                     <Section x:Name="sectionContinuedFractionRemark" Padding="0 1 0 0" Margin="0">
-                        <Paragraph>
+                        <!--<Paragraph>
                             <Run Text="Remarks" FontWeight="Bold"/>
-                        </Paragraph>
-                        <Section Padding="12 0">
-                            <Paragraph>
-                                <Run x:Name="runRemarks" d:Text="Remarks"/>
+                        </Paragraph>-->
+                        <Section Padding="0 4">
+                            <Paragraph >
+                                <Run x:Name="runRemarks" d:Text="⚠ Remarks"/>
                             </Paragraph>
                         </Section>
                     </Section>

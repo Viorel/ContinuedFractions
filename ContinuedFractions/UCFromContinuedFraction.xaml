@@ -106,7 +106,7 @@
                             <Paragraph >
                                 <Run Text="Decimal number" FontWeight="Bold"/>
                             </Paragraph>
-                            <Section Padding="10 0" Margin="0">
+                            <Section Padding="9 0" Margin="0">
                                 <Paragraph >
                                     <Run x:Name="runDecimal" FontWeight="Bold" FontSize="22" d:Text="12.345" />
                                 </Paragraph>
