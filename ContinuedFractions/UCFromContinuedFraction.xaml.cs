@@ -168,13 +168,13 @@ namespace ContinuedFractions
             {
                 StopThread( );
 
-                IReadOnlyList<BigInteger>? continued_fraction = GetInputContinuedFraction( );
+                (bool is_negative, IReadOnlyList<BigInteger>? continued_fraction) = GetInputContinuedFraction( );
                 if( continued_fraction == null ) return;
 
                 mLastCancellable = new SimpleCancellable( );
                 mCalculationThread = new Thread( ( ) =>
                 {
-                    CalculationThreadProc( mLastCancellable, continued_fraction );
+                    CalculationThreadProc( mLastCancellable, is_negative, continued_fraction );
                 } )
                 {
                     IsBackground = true,
@@ -194,7 +194,7 @@ namespace ContinuedFractions
             }
         }
 
-        IReadOnlyList<BigInteger>? GetInputContinuedFraction( )
+        (bool isNegative, IReadOnlyList<BigInteger>? list) GetInputContinuedFraction( )
         {
             string input_text = textBoxContinuedFraction.Text;
 
@@ -203,7 +203,7 @@ namespace ContinuedFractions
                 ShowOneRichTextBox( richTextBoxNote );
                 HideProgress( );
 
-                return null;
+                return (false, null);
             }
 
             Match m = RegexToParseContinuedFraction( ).Match( input_text );
@@ -213,8 +213,10 @@ namespace ContinuedFractions
                 ShowOneRichTextBox( richTextBoxTypicalError );
                 HideProgress( );
 
-                return null;
+                return (false, null);
             }
+
+            bool is_negative = m.Groups["is_negative"].Success;
 
             BigInteger first = BigInteger.Parse( m.Groups["first"].Value );
 
@@ -232,10 +234,10 @@ namespace ContinuedFractions
                 }
             }
 
-            return list;
+            return (is_negative, list);
         }
 
-        void CalculationThreadProc( ICancellable cnc, IReadOnlyList<BigInteger> continuedFraction )
+        void CalculationThreadProc( ICancellable cnc, bool isNegative, IReadOnlyList<BigInteger> continuedFraction )
         {
             try
             {
@@ -253,6 +255,7 @@ namespace ContinuedFractions
                 IReadOnlyList<BigInteger>? corrected_regular_continued_fraction = null;
 
                 Fraction result = convergents.Last( );
+                if( isNegative ) result = Fraction.Neg( result, ctx );
                 result = result.Simplify( ctx );
 
                 if( result.IsNormal )
@@ -310,6 +313,7 @@ namespace ContinuedFractions
         void ShowResults( ICancellable cnc, Fraction result, Fraction[] convergents, IReadOnlyList<BigInteger>? correctedRegularContinuedFraction )
         {
             bool is_corrected = correctedRegularContinuedFraction != null;
+            bool is_normal = result.IsNormal;
 
             string result_as_decimal = result.ToFloatString( cnc, 20 );
 
@@ -336,7 +340,7 @@ namespace ContinuedFractions
 
             string result_as_fraction;
 
-            if( !result.IsNormal )
+            if( !is_normal )
             {
                 result_as_fraction = result.ToRationalString( cnc, 20 ); // 
             }
@@ -383,7 +387,7 @@ namespace ContinuedFractions
 
                 sb_corrected
                     .Append( "[ " )
-                    .Append( correctedRegularContinuedFraction[0].ToString( "D" ) );
+                    .Append( correctedRegularContinuedFraction![0].ToString( "D" ) );
 
                 for( int i = 1; i < correctedRegularContinuedFraction.Count; i++ )
                 {
@@ -409,9 +413,9 @@ namespace ContinuedFractions
                     runConvergents.Text = sb_convergents.ToString( );
                     runConvergentsTitle.Text = convergents_title;
 
-                    UIUtilities.ShowTopBlock( richTextBoxResults.Document, sectionInfo, !is_corrected, sectionFraction );
-                    UIUtilities.ShowTopBlock( richTextBoxResults.Document, sectionWarning, is_corrected, sectionFraction );
-                    UIUtilities.ShowTopBlock( richTextBoxResults.Document, sectionCorrected, is_corrected, sectionFraction, sectionWarning );
+                    UIUtilities.ShowTopBlock( richTextBoxResults.Document, sectionInfo, is_normal && !is_corrected, sectionFraction );
+                    UIUtilities.ShowTopBlock( richTextBoxResults.Document, sectionWarning, is_normal && is_corrected, sectionFraction );
+                    UIUtilities.ShowTopBlock( richTextBoxResults.Document, sectionCorrected, is_normal && is_corrected, sectionFraction, sectionWarning );
 
                     ShowOneRichTextBox( richTextBoxResults );
                 } );
@@ -537,13 +541,12 @@ namespace ContinuedFractions
         [GeneratedRegex( """
             (?xni)
             ^
-            \s* \[? \s*
+            \s* ((\+|(?<is_negative>-))? \s* \[)? \s*
             (?<first>[\-\+]?\d+) (\s* ([,;]|\s+) \s* (?<next>[\-\+]?\d+))* [,;]?
             \s* \]? \s*
             $
             """, RegexOptions.IgnorePatternWhitespace
         )]
         private static partial Regex RegexToParseContinuedFraction( );
-
     }
 }
