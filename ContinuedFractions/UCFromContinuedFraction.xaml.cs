@@ -335,7 +335,9 @@ namespace ContinuedFractions
             bool is_corrected = correctedRegularContinuedFraction != null;
             bool is_normal = result.IsNormal;
 
-            string result_as_decimal = result.ToFloatString( cnc, 20 );
+            // try to show more digits if it is a repeating decimal
+            string result_as_decimal = result.ToFloatString( cnc, 50 );
+            if( !result_as_decimal.Contains( '(' ) ) result_as_decimal = result.ToFloatString( cnc, 20 );
 
             bool is_negative = result.IsNegative;
             BigInteger n = BigInteger.Abs( result.N );

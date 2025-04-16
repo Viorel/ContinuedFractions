@@ -93,7 +93,7 @@
                         </Paragraph>
                         <Section Padding="12 0">
                             <Paragraph Padding="0" Margin="0">
-                                <Run x:Name="runDecimal" FontSize="18" d:Text="1 / 2"/>
+                                <Run x:Name="runDecimal" FontSize="18" d:Text="12.345"/>
                             </Paragraph>
                         </Section>
                     </Section>

@@ -470,7 +470,9 @@ namespace ContinuedFractions
                     ++convergent_number;
                 }
 
-                decimal_string = initialFraction.ToFloatString( cnc, 20 );
+                // try to show more digits if it is a repeating decimal
+                decimal_string = initialFraction.ToFloatString( cnc, 50 );
+                if( !decimal_string.Contains( '(' ) ) decimal_string = initialFraction.ToFloatString( cnc, 20 );
 
                 bool is_negative = initialFraction.IsNegative;
                 BigInteger n = BigInteger.Abs( initialFraction.N );
