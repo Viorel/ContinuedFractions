@@ -48,7 +48,6 @@
 
             <Grid Grid.Row="1">
                 <RichTextBox x:Name="richTextBoxNote" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto" FontSize="14" 
-                         Background="{DynamicResource {x:Static SystemColors.InfoBrushKey}}" Foreground="{DynamicResource {x:Static SystemColors.InfoTextBrushKey}}"
                          d:Visibility="Hidden">
                     <FlowDocument >
                         <Paragraph Padding="2 18">
