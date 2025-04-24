@@ -28,7 +28,7 @@ namespace ContinuedFractions
     public partial class UCToContinuedFraction : UserControl
     {
         const int MAX_CONTINUED_FRACTION_ITEMS = 100;
-        const int MAX_BIGINTEGER_BYTE_SIZE = 128;
+        const int MAX_DIGITS = 300; // (for numerator and denominator)
         readonly TimeSpan DELAY_BEFORE_CALCULATION = TimeSpan.FromMilliseconds( 444 );
         readonly TimeSpan DELAY_BEFORE_PROGRESS = TimeSpan.FromMilliseconds( 455 ); // (must be greater than 'DELAY_BEFORE_CALCULATION')
         readonly TimeSpan MIN_DURATION_PROGRESS = TimeSpan.FromMilliseconds( 444 );
@@ -244,10 +244,10 @@ namespace ContinuedFractions
                         BigInteger significant = integer * floating_magnitude + floating;
                         BigInteger significant_with_repeating = significant * repeating_magnitude + repeating;
                         Debug.Assert( significant_with_repeating >= significant );
-                        BigInteger nominator = significant_with_repeating - significant;
+                        BigInteger numerator = significant_with_repeating - significant;
                         BigInteger denominator = floating_magnitude * ( repeating_magnitude - 1 );
 
-                        Fraction fraction = new( is_negative ? -nominator : nominator, denominator, exponent );
+                        Fraction fraction = new( is_negative ? -numerator : numerator, denominator, exponent );
 
                         return fraction;
                     }
@@ -273,21 +273,21 @@ namespace ContinuedFractions
                 }
             }
 
-            if( m.Groups["nominator"].Success )
+            if( m.Groups["numerator"].Success )
             {
                 bool is_negative = m.Groups["negative"].Success;
                 bool is_exponent_negative = m.Groups["negative_exponent"].Success;
                 Group denominator_group = m.Groups["denominator"];
                 Group exponent_group = m.Groups["exponent"];
 
-                BigInteger nominator = BigInteger.Parse( m.Groups["nominator"].Value, CultureInfo.InvariantCulture );
+                BigInteger numerator = BigInteger.Parse( m.Groups["numerator"].Value, CultureInfo.InvariantCulture );
                 BigInteger denominator = denominator_group.Success ? BigInteger.Parse( denominator_group.Value, CultureInfo.InvariantCulture ) : BigInteger.One;
                 BigInteger exponent = exponent_group.Success ? BigInteger.Parse( exponent_group.Value, CultureInfo.InvariantCulture ) : BigInteger.Zero;
                 if( is_exponent_negative ) exponent = -exponent;
 
                 Fraction fraction;
 
-                if( nominator.IsZero )
+                if( numerator.IsZero )
                 {
                     if( denominator.IsZero )
                     {
@@ -306,7 +306,7 @@ namespace ContinuedFractions
                     }
                     else
                     {
-                        fraction = new Fraction( is_negative ? -nominator : nominator, denominator, exponent );
+                        fraction = new Fraction( is_negative ? -numerator : numerator, denominator, exponent );
                     }
                 }
 
@@ -340,7 +340,7 @@ namespace ContinuedFractions
                 }
                 else
                 {
-                    CalculationContext ctx = new( cnc, 33 );
+                    CalculationContext ctx = new( cnc, MAX_DIGITS );
 
                     fraction = fraction.Simplify( ctx );
 
@@ -348,23 +348,27 @@ namespace ContinuedFractions
 
                     string? error_text = null;
 
+                    Debug.Assert( d > 0 );
+
                     while( error_text == null && e < 0 )
                     {
                         d *= 10;
                         ++e;
 
-                        if( d.GetByteCount( ) > MAX_BIGINTEGER_BYTE_SIZE )
+                        if( d > ctx.MaxVal )
                         {
                             error_text = "The number exceeds the supported limits.";
                         }
                     }
+
+                    Debug.Assert( n >= 0 );
 
                     while( error_text == null && e > 0 )
                     {
                         n *= 10;
                         --e;
 
-                        if( n.GetByteCount( ) > MAX_BIGINTEGER_BYTE_SIZE )
+                        if( n > ctx.MaxVal )
                         {
                             error_text = "The number exceeds the supported limits.";
                         }
@@ -479,20 +483,26 @@ namespace ContinuedFractions
                 BigInteger d = initialFraction.D;
                 BigInteger e = initialFraction.E;
 
+                CalculationContext ctx = new( cnc, MAX_DIGITS );
+
+                Debug.Assert( d > 0 );
+
                 while( e < 0 )
                 {
                     d *= 10;
                     ++e;
 
-                    if( d.GetByteCount( ) > MAX_BIGINTEGER_BYTE_SIZE ) throw new ApplicationException( "The number exceeds the supported limits." );
+                    if( d > ctx.MaxVal ) throw new ApplicationException( "The number exceeds the supported limits." );
                 }
+
+                Debug.Assert( n >= 0 );
 
                 while( e > 0 )
                 {
                     n *= 10;
                     --e;
 
-                    if( n.GetByteCount( ) > MAX_BIGINTEGER_BYTE_SIZE ) throw new ApplicationException( "The number exceeds the supported limits." );
+                    if( n > ctx.MaxVal ) throw new ApplicationException( "The number exceeds the supported limits." );
                 }
 
                 fraction_string = $"{( is_negative ? -n : n ):D}";
@@ -648,7 +658,7 @@ namespace ContinuedFractions
              )
             |
              (
-              (\+|(?<negative>-))? \s* (?<nominator>\d+) 
+              (\+|(?<negative>-))? \s* (?<numerator>\d+) 
               (\s* [eE] \s* (\+|(?<negative_exponent>-))? \s* (?<exponent>\d+))? 
               \s* / \s*
               (?<denominator>\d+) 

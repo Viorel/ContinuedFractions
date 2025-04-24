@@ -26,7 +26,7 @@ namespace ContinuedFractions
     public partial class UCFromContinuedFraction : UserControl
     {
         const int MAX_CONTINUED_FRACTION_ITEMS = 100;
-        const int MAX_BIGINTEGER_BYTE_SIZE = 128;
+        const int MAX_DIGITS = 300; // (for numerator and denominator)
         readonly TimeSpan DELAY_BEFORE_CALCULATION = TimeSpan.FromMilliseconds( 444 );
         readonly TimeSpan DELAY_BEFORE_PROGRESS = TimeSpan.FromMilliseconds( 455 ); // (must be greater than 'DELAY_BEFORE_CALCULATION')
         readonly TimeSpan MIN_DURATION_PROGRESS = TimeSpan.FromMilliseconds( 444 );
@@ -241,7 +241,7 @@ namespace ContinuedFractions
         {
             try
             {
-                CalculationContext ctx = new( cnc, 33 );
+                CalculationContext ctx = new( cnc, MAX_DIGITS );
 
                 Fraction[] convergents =
                     ContinuedFractionUtilities
@@ -264,20 +264,24 @@ namespace ContinuedFractions
                     BigInteger d = result.D;
                     BigInteger e = result.E;
 
+                    Debug.Assert( d > 0 );
+
                     while( e < 0 )
                     {
                         d *= 10;
                         ++e;
 
-                        if( d.GetByteCount( ) > MAX_BIGINTEGER_BYTE_SIZE ) throw new ApplicationException( "The number exceeds the supported limits." );
+                        if( d > ctx.MaxVal ) throw new ApplicationException( "The number exceeds the supported limits." );
                     }
+
+                    Debug.Assert( n >= 0 );
 
                     while( e > 0 )
                     {
                         n *= 10;
                         --e;
 
-                        if( n.GetByteCount( ) > MAX_BIGINTEGER_BYTE_SIZE ) throw new ApplicationException( "The number exceeds the supported limits." );
+                        if( n > ctx.MaxVal ) throw new ApplicationException( "The number exceeds the supported limits." );
                     }
 
                     Debug.Assert( e.IsZero );
@@ -344,20 +348,26 @@ namespace ContinuedFractions
             BigInteger d = result.D;
             BigInteger e = result.E;
 
+            CalculationContext ctx = new( cnc, MAX_DIGITS );
+
+            Debug.Assert( d > 0 );
+
             while( e < 0 )
             {
                 d *= 10;
                 ++e;
 
-                if( d.GetByteCount( ) > MAX_BIGINTEGER_BYTE_SIZE ) throw new ApplicationException( "The number exceeds the supported limits." );
+                if( d > ctx.MaxVal ) throw new ApplicationException( "The number exceeds the supported limits." );
             }
+
+            Debug.Assert( n >= 0 );
 
             while( e > 0 )
             {
                 n *= 10;
                 --e;
 
-                if( n.GetByteCount( ) > MAX_BIGINTEGER_BYTE_SIZE ) throw new ApplicationException( "The number exceeds the supported limits." );
+                if( n > ctx.MaxVal ) throw new ApplicationException( "The number exceeds the supported limits." );
             }
 
             Debug.Assert( e.IsZero );
