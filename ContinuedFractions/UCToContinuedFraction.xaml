@@ -13,9 +13,15 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <StackPanel Grid.Row="0" Orientation="Vertical" VerticalAlignment="Top">
-            <Label Content="Decimal _number or fraction:" Target="{Binding ElementName=textBoxNumber}"/>
-            <TextBox x:Name="textBoxNumber" Padding="3 3" FontSize="22" TextChanged="textBoxNumber_TextChanged" SelectionChanged="textBoxNumber_SelectionChanged" d:Text="1234"/>
-            <Label Content="Examples: 12.345, 123/45, 12.3(45), 1.2345e-7" FontStyle="Italic" Padding="4 1" Opacity="0.7" />
+            <Label Content="Decimal or rational _number:" Target="{Binding ElementName=textBoxNumber}"/>
+            <ScrollViewer Grid.Column="0" Grid.Row="1" VerticalScrollBarVisibility="Auto" Height="38" Margin="0 0 8 0" Padding="0">
+                <TextBox x:Name="textBoxNumber" Padding="1 3" Margin="0" FontSize="22" TextChanged="textBoxNumber_TextChanged" SelectionChanged="textBoxNumber_SelectionChanged" d:Text="1234"/>
+            </ScrollViewer>
+            <Label Padding="4 1" Opacity="0.7">
+                <TextBlock>
+                    <Italic>Examples:</Italic>  12.345, 123/45, 12.3(45), 1.2345e-7
+                </TextBlock>
+            </Label>
             <Label Content="_Results:" Target="{Binding ElementName=richTextBoxResults}" Margin="0 8 0 0"/>
         </StackPanel>
         <Grid Grid.Row="1">
