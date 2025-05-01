@@ -28,7 +28,7 @@ namespace ContinuedFractions
     public partial class UCToContinuedFraction : UserControl
     {
         const int MAX_CONTINUED_FRACTION_ITEMS = 100;
-        const int MAX_DIGITS = 300; // (for numerator and denominator)
+        const int MAX_DIGITS = 1000; // (for numerator and denominator)
         readonly TimeSpan DELAY_BEFORE_CALCULATION = TimeSpan.FromMilliseconds( 444 );
         readonly TimeSpan DELAY_BEFORE_PROGRESS = TimeSpan.FromMilliseconds( 455 ); // (must be greater than 'DELAY_BEFORE_CALCULATION')
         readonly TimeSpan MIN_DURATION_PROGRESS = TimeSpan.FromMilliseconds( 444 );
