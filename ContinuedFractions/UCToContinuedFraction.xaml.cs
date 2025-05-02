@@ -27,6 +27,8 @@ namespace ContinuedFractions
     /// </summary>
     public partial class UCToContinuedFraction : UserControl
     {
+        const int MAX_OUTPUT_DIGITS_DECIMAL = 250000; // (for example, the period of 6918696/2996677 has 241665 digits)
+        const int MAX_OUTPUT_DIGITS_CONVERGENTS = 30;
         const int MAX_CONTINUED_FRACTION_ITEMS = 100;
         const int MAX_DIGITS = 1000; // (for numerator and denominator)
         readonly TimeSpan DELAY_BEFORE_CALCULATION = TimeSpan.FromMilliseconds( 444 );
@@ -420,7 +422,7 @@ namespace ContinuedFractions
             if( !initialFraction.IsNormal )
             {
                 sb_continued_fraction.Append( "Undefined" );
-                decimal_string = initialFraction.ToFloatString( cnc, 33 );
+                decimal_string = initialFraction.ToFloatString( cnc, MAX_OUTPUT_DIGITS_DECIMAL );
                 fraction_string = initialFraction.ToRationalString( cnc, 33 );
                 remarks = "⚠ The entered value is not a number.";
                 sb_convergents.Append( "—\r\n" );
@@ -464,7 +466,7 @@ namespace ContinuedFractions
                 foreach( (BigInteger n, BigInteger d) p in ContinuedFractionUtilities.EnumerateContinuedFractionConvergents( continued_fraction_items ) )
                 {
                     Fraction f = new( p.n, p.d );
-                    string fs = f.ToFloatString( cnc, 20 );
+                    string fs = f.ToFloatString( cnc, MAX_OUTPUT_DIGITS_CONVERGENTS );
                     bool fsa = fs.Contains( '≈' );
                     fs = fs.Replace( "≈", "" );
 
@@ -474,9 +476,7 @@ namespace ContinuedFractions
                     ++convergent_number;
                 }
 
-                // try to show more digits if it is a repeating decimal
-                decimal_string = initialFraction.ToFloatString( cnc, 50 );
-                if( !decimal_string.Contains( '(' ) ) decimal_string = initialFraction.ToFloatString( cnc, 20 );
+                decimal_string = initialFraction.ToFloatString( cnc, MAX_OUTPUT_DIGITS_DECIMAL );
 
                 bool is_negative = initialFraction.IsNegative;
                 BigInteger n = BigInteger.Abs( initialFraction.N );
@@ -527,6 +527,16 @@ namespace ContinuedFractions
                 runConvergents.Text = sb_convergents.ToString( );
 
                 ShowOneRichTextBox( richTextBoxResults );
+
+                {
+                    // adjust page width to avoid wrapping
+
+                    string text = new TextRange( richTextBoxResults.Document.ContentStart, richTextBoxResults.Document.ContentEnd ).Text;
+                    FormattedText ft = new( text, CultureInfo.CurrentCulture, FlowDirection.LeftToRight,
+                        new Typeface( richTextBoxResults.FontFamily, richTextBoxResults.FontStyle, FontWeights.Bold, richTextBoxResults.FontStretch ), richTextBoxResults.FontSize, Brushes.Black, VisualTreeHelper.GetDpi( richTextBoxResults ).PixelsPerDip );
+
+                    richTextBoxResults.Document.PageWidth = ft.Width + 100;
+                }
             } );
         }
 

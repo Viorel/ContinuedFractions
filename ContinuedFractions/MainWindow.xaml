@@ -19,7 +19,7 @@
             </TabControl.Resources>
             <TabItem>
                 <TabItem.Header>
-                    <TextBlock>
+                    <TextBlock Padding="4 0">
                         <!-- → ⇒ ⇨ ⇾ ⟶ ⭢ 🠒 ⭢ 🡆 🡪 🡲 🢂 🠶 ➞ -->
                         <Run Text="Number"/>
                         <Run Text="🡪" />
@@ -30,7 +30,7 @@
             </TabItem>
             <TabItem>
                 <TabItem.Header>
-                    <TextBlock>
+                    <TextBlock Padding="4 0">
                         <Run Text="Continued Fraction"/>
                         <Run Text="🡪" />
                         <Run Text="Number"/>

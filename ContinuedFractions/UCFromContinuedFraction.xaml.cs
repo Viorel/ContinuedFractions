@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Numerics;
 using System.Text;
@@ -25,6 +26,9 @@ namespace ContinuedFractions
     /// </summary>
     public partial class UCFromContinuedFraction : UserControl
     {
+        const int MAX_OUTPUT_DIGITS_DECIMAL = 250000; // (for example, the period of 6918696/2996677 has 241665 digits)
+        const int MAX_OUTPUT_DIGITS_FRACTION = 200;
+        const int MAX_OUTPUT_DIGITS_CONVERGENTS = 30;
         const int MAX_CONTINUED_FRACTION_ITEMS = 100;
         const int MAX_DIGITS = 300; // (for numerator and denominator)
         readonly TimeSpan DELAY_BEFORE_CALCULATION = TimeSpan.FromMilliseconds( 444 );
@@ -338,52 +342,55 @@ namespace ContinuedFractions
         {
             bool is_corrected = correctedRegularContinuedFraction != null;
             bool is_normal = result.IsNormal;
-
-            // try to show more digits if it is a repeating decimal
-            string result_as_decimal = result.ToFloatString( cnc, 50 );
-            if( !result_as_decimal.Contains( '(' ) ) result_as_decimal = result.ToFloatString( cnc, 20 );
-
             bool is_negative = result.IsNegative;
-            BigInteger n = BigInteger.Abs( result.N );
-            BigInteger d = result.D;
-            BigInteger e = result.E;
 
-            CalculationContext ctx = new( cnc, MAX_DIGITS );
-
-            Debug.Assert( d > 0 );
-
-            while( e < 0 )
-            {
-                d *= 10;
-                ++e;
-
-                if( d > ctx.MaxVal ) throw new ApplicationException( "The number exceeds the supported limits." );
-            }
-
-            Debug.Assert( n >= 0 );
-
-            while( e > 0 )
-            {
-                n *= 10;
-                --e;
-
-                if( n > ctx.MaxVal ) throw new ApplicationException( "The number exceeds the supported limits." );
-            }
-
-            Debug.Assert( e.IsZero );
+            string result_as_decimal = result.ToFloatString( cnc, MAX_OUTPUT_DIGITS_DECIMAL );
+            bool is_decimal_approx = result_as_decimal.StartsWith( '≈' );
 
             string result_as_fraction;
 
+#if true
             if( !is_normal )
             {
                 result_as_fraction = result.ToRationalString( cnc, 20 ); // 
             }
             else
             {
+                BigInteger n = BigInteger.Abs( result.N );
+                BigInteger d = result.D;
+                BigInteger e = result.E;
+
+                CalculationContext ctx = new( cnc, MAX_DIGITS );
+
+                Debug.Assert( d > 0 );
+
+                while( e < 0 )
+                {
+                    d *= 10;
+                    ++e;
+
+                    if( d > ctx.MaxVal ) throw new ApplicationException( "The number exceeds the supported limits." );
+                }
+
+                Debug.Assert( n >= 0 );
+
+                while( e > 0 )
+                {
+                    n *= 10;
+                    --e;
+
+                    if( n > ctx.MaxVal ) throw new ApplicationException( "The number exceeds the supported limits." );
+                }
+
+                Debug.Assert( e.IsZero );
+
                 result_as_fraction = $"{( is_negative ? -n : n ):D}";
                 if( !e.IsZero ) result_as_fraction = $"{result_as_fraction}e{( e >= 0 ? "+" : "" )}{e:D}";
                 if( !d.IsOne ) result_as_fraction = $"{result_as_fraction} / {d:D}";
             }
+#else
+            result_as_fraction = result.ToRationalString( cnc, MAX_OUTPUT_DIGITS_FRACTION );
+#endif
 
             StringBuilder sb_convergents = new( );
             string convergents_title;
@@ -397,13 +404,13 @@ namespace ContinuedFractions
                 if( !f.IsNormal )
                 {
                     sb_convergents
-                        .AppendLine( f.ToRationalString( cnc, 20 ) );
+                        .AppendLine( f.ToRationalString( cnc, MAX_OUTPUT_DIGITS_CONVERGENTS ) );
                 }
                 else
                 {
                     Debug.Assert( f.E == 0 );
 
-                    string fs = f.ToFloatString( cnc, 20 );
+                    string fs = f.ToFloatString( cnc, MAX_OUTPUT_DIGITS_CONVERGENTS );
                     bool fsa = fs.Contains( '≈' );
                     fs = fs.Replace( "≈", "" );
                     sb_convergents
@@ -452,6 +459,16 @@ namespace ContinuedFractions
                     UIUtilities.ShowTopBlock( richTextBoxResults.Document, sectionCorrected, is_normal && is_corrected, sectionFraction, sectionWarning );
 
                     ShowOneRichTextBox( richTextBoxResults );
+
+                    {
+                        // adjust page width to avoid wrapping
+
+                        string text = new TextRange( richTextBoxResults.Document.ContentStart, richTextBoxResults.Document.ContentEnd ).Text;
+                        FormattedText ft = new( text, CultureInfo.CurrentCulture, FlowDirection.LeftToRight,
+                            new Typeface( richTextBoxResults.FontFamily, richTextBoxResults.FontStyle, FontWeights.Bold, richTextBoxResults.FontStretch ), richTextBoxResults.FontSize, Brushes.Black, VisualTreeHelper.GetDpi( richTextBoxResults ).PixelsPerDip );
+
+                        richTextBoxResults.Document.PageWidth = ft.Width + 100;
+                    }
                 } );
         }
 

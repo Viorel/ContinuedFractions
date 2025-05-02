@@ -92,7 +92,7 @@
                     </FlowDocument>
                 </RichTextBox>
 
-                <RichTextBox x:Name="richTextBoxResults" Padding="8" IsReadOnly="True" IsReadOnlyCaretVisible="True" VerticalScrollBarVisibility="Auto" d:Visibility="Visible">
+                <RichTextBox x:Name="richTextBoxResults" Padding="8" IsReadOnly="True" IsReadOnlyCaretVisible="True" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" FontSize="22" d:Visibility="Visible">
                     <RichTextBox.Resources>
                         <Style TargetType="Paragraph">
                             <Setter Property="Margin" Value="4"/>
@@ -102,7 +102,7 @@
 
                     <FlowDocument>
                         <Section x:Name="sectionDecimal">
-                            <Paragraph >
+                            <Paragraph FontSize="12">
                                 <Run Text="Decimal number" FontWeight="Bold"/>
                             </Paragraph>
                             <Section Padding="9 0" Margin="0">
@@ -113,7 +113,7 @@
                         </Section>
 
                         <Section x:Name="sectionFraction" Padding="0 1 0 0" Margin="0">
-                            <Paragraph>
+                            <Paragraph FontSize="12">
                                 <Run Text="Fraction" FontWeight="Bold"/>
                             </Paragraph>
                             <Section Padding="12 0">
@@ -123,7 +123,7 @@
                             </Section>
                         </Section>
 
-                        <Section x:Name="sectionInfo" Padding="0 1 0 0" Margin="0">
+                        <Section x:Name="sectionInfo" Padding="0 1 0 0" Margin="0" FontSize="12">
                             <Paragraph Padding="0 8 0 0" >
                                 <!-- ℹⓘ -->
                                 <!--<Run Text="ℹ"/>-->
@@ -131,7 +131,7 @@
                             </Paragraph>
                         </Section>
 
-                        <Section x:Name="sectionWarning" Padding="0 1 0 0" Margin="0">
+                        <Section x:Name="sectionWarning" Padding="0 1 0 0" Margin="0" FontSize="12">
                             <Paragraph Padding="0 8 0 0" >
                                 <Run Text="⚠️"/>
                                 <Run Text="The entered continued fraction is not normalized."/>
@@ -139,17 +139,17 @@
                         </Section>
 
                         <Section x:Name="sectionCorrected" Padding="0 1 0 0" Margin="0">
-                            <Paragraph>
+                            <Paragraph FontSize="12">
                                 <Run Text="Corrected regular continued fraction" FontWeight="Bold"/>
                             </Paragraph>
-                            <Section Padding="12 0">
+                            <Section Padding="12 0" FontSize="18">
                                 <Paragraph Padding="0" Margin="0">
-                                    <Run x:Name="runCorrected" FontSize="18" d:Text="1 / 2"/>
+                                    <Run x:Name="runCorrected" d:Text="[ 1; 2, 3 ]"/>
                                 </Paragraph>
                             </Section>
                         </Section>
 
-                        <Section Padding="0 1 0 0" Margin="0">
+                        <Section Padding="0 1 0 0" Margin="0" FontSize="12">
                             <Paragraph>
                                 <Run x:Name="runConvergentsTitle" Text="Convergents" FontWeight="Bold"/>
                             </Paragraph>
@@ -162,7 +162,7 @@
                     </FlowDocument>
                 </RichTextBox>
 
-                <Label x:Name="labelPleaseWait" Content="Calculation in progress... " VerticalAlignment="Bottom" HorizontalAlignment="Left" 
+                <Label x:Name="labelPleaseWait" Content="&#x23F3; Calculation in progress... " VerticalAlignment="Bottom" HorizontalAlignment="Left" 
                    BorderBrush="{DynamicResource {x:Static SystemColors.WindowFrameBrushKey}}" BorderThickness="0.75" 
                    Background="{DynamicResource {x:Static SystemColors.InfoBrushKey}}" Foreground="{DynamicResource {x:Static SystemColors.InfoTextBrushKey}}"
                    Visibility="Hidden" d:Visibility="Visible"/>

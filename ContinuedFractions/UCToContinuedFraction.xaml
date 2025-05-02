@@ -74,7 +74,7 @@
                 </FlowDocument>
             </RichTextBox>
 
-            <RichTextBox x:Name="richTextBoxResults" Padding="4 8 2 2" IsReadOnly="True" IsReadOnlyCaretVisible="True" VerticalScrollBarVisibility="Auto" d:Visibility="Visible" >
+            <RichTextBox x:Name="richTextBoxResults" Padding="4 8 2 2" IsReadOnly="True" IsReadOnlyCaretVisible="True" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" FontSize="22" d:Visibility="Visible" >
                 <RichTextBox.Resources>
                     <Style TargetType="Paragraph">
                         <Setter Property="Margin" Value="4"/>
@@ -83,18 +83,18 @@
                 </RichTextBox.Resources>
                 <FlowDocument>
                     <Section x:Name="sectionContinuedFraction">
-                        <Paragraph >
+                        <Paragraph FontSize="12">
                             <Run Text="Regular continued fraction" FontWeight="Bold"/>
                         </Paragraph>
                         <Section Padding="9 0" Margin="0">
                             <Paragraph >
-                                <Run x:Name="runContinuedFraction" FontWeight="Bold" FontSize="22" d:Text="[1; 2, 3, 4]" />
+                                <Run x:Name="runContinuedFraction" FontWeight="Bold" d:Text="[1; 2, 3, 4]" />
                             </Paragraph>
                         </Section>
                     </Section>
 
                     <Section x:Name="sectionDecimal" Padding="0 1 0 0" Margin="0">
-                        <Paragraph>
+                        <Paragraph FontSize="12">
                             <Run Text="Decimal" FontWeight="Bold"/>
                         </Paragraph>
                         <Section Padding="12 0">
@@ -105,17 +105,17 @@
                     </Section>
 
                     <Section x:Name="sectionFraction" Padding="0 1 0 0" Margin="0">
-                        <Paragraph>
+                        <Paragraph FontSize="12">
                             <Run Text="Simplified fraction" FontWeight="Bold"/>
                         </Paragraph>
-                        <Section Padding="12 0">
+                        <Section Padding="12 0" FontSize="18">
                             <Paragraph Padding="0" Margin="0">
-                                <Run x:Name="runFraction" FontSize="18" d:Text="1 / 2"/>
+                                <Run x:Name="runFraction" d:Text="1 / 2"/>
                             </Paragraph>
                         </Section>
                     </Section>
 
-                    <Section x:Name="sectionContinuedFractionRemark" Padding="0 1 0 0" Margin="0">
+                    <Section x:Name="sectionContinuedFractionRemark" Padding="0 1 0 0" Margin="0" FontSize="12">
                         <!--<Paragraph>
                             <Run Text="Remarks" FontWeight="Bold"/>
                         </Paragraph>-->
@@ -126,7 +126,7 @@
                         </Section>
                     </Section>
 
-                    <Section Padding="0 1 0 0" Margin="0">
+                    <Section Padding="0 1 0 0" Margin="0" FontSize="12">
                         <Paragraph>
                             <Run Text="Convergents" FontWeight="Bold"/>
                         </Paragraph>
@@ -139,7 +139,7 @@
                 </FlowDocument>
             </RichTextBox>
 
-            <Label x:Name="labelPleaseWait" Content="Calculation in progress... " VerticalAlignment="Bottom" HorizontalAlignment="Left" 
+            <Label x:Name="labelPleaseWait" Content="&#x23F3; Calculation in progress... " VerticalAlignment="Bottom" HorizontalAlignment="Left" 
                    BorderBrush="{DynamicResource {x:Static SystemColors.WindowFrameBrushKey}}" BorderThickness="0.75" 
                    Background="{DynamicResource {x:Static SystemColors.InfoBrushKey}}" Foreground="{DynamicResource {x:Static SystemColors.InfoTextBrushKey}}"
                    Visibility="Hidden" d:Visibility="Visible"/>
