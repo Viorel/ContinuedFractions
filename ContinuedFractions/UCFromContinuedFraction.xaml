@@ -21,7 +21,7 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <Label Grid.Row="0" Content="Continued fraction:" Target="{Binding ElementName=textBoxContinuedFraction}"/>
+            <Label Grid.Row="0" Content="Continued _fraction:" Target="{Binding ElementName=textBoxContinuedFraction}"/>
 
             <TextBox Grid.Row="1" x:Name="textBoxContinuedFraction" Padding="3 3" FontSize="22" TextChanged="textBoxContinuedFraction_TextChanged" SelectionChanged="textBoxContinuedFraction_SelectionChanged"
                  d:Text="[1; 2, 3, 4 ]" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"/>
@@ -44,7 +44,7 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <Label Grid.Row="0" Content="Results:"/>
+            <Label Grid.Row="0" Content="_Results:" Target="{Binding ElementName=richTextBoxResults}"/>
 
             <Grid Grid.Row="1">
                 <RichTextBox x:Name="richTextBoxNote" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto" FontSize="14" 
