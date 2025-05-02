@@ -1,6 +1,6 @@
 # Continued Fractions
 
-An experimental tool that converts decimal numbers and fractions to continued fractions, and vice versa.
+An experimental tool that converts decimal and rational numbers to continued fractions, and vice versa.
 The program also displays the convergents, and converts the simple continued fractions to regular ones.
 
 For example:
@@ -25,16 +25,16 @@ Input               | Meaning
 0.8(3)              | Repeating (recurring) decimal
 5/6                 | Fraction
 1.2e&#x2011;7       | Scientific notation (1.2×10&#x207B;&#x2077;)
-pi | Number &#x03C0; (3.1415926&#x2026;)
-e | Euler's (Napier's) number (2.7182818&#x2026;)
+pi                  | Number &#x03C0;&#xA0;&#x2248;&#xA0;3.1415926 (about 300&#xA0;digits)
+e                   | Euler's (Napier's) number _e_&#xA0;&#x2248;&#xA0;2.7182818 (about 300&#xA0;digits)
 
 ### Screenshots
 
-Converting a decimal number or fraction to regular continued fraction:
+Converting a decimal or rational number to regular continued fraction:
 
 ![Converting a decimal number or fraction to regular continued fraction](Screenshot1.png)
 
-Converting a simple continued fraction to decimal number and fraction. The output also
+Converting a simple continued fraction to decimal and rational number. The output also
 includes the corrected regular continued fraction:
 
 ![Converting a continued fraction to decimal number and fraction](Screenshot2.png)
