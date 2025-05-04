@@ -65,7 +65,7 @@
                             <Run FontWeight="Bold" Text="⚠ The entered value is invalid."/>
                         </Paragraph>
                         <Paragraph>
-                            <Run Text="Please enter a valid continued fraction, for example:"/>
+                            <Run Text="Please enter a valid continued fraction. For example:"/>
                         </Paragraph>
                         <Paragraph Margin="14 0" FontWeight="Bold">
                             <Run Text="[ 1; 2, 3, 4 ]"/>

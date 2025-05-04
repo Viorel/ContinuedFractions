@@ -30,7 +30,7 @@ namespace ContinuedFractions
         const int MAX_OUTPUT_DIGITS_DECIMAL = 250000; // (for example, the period of 6918696/2996677 has 241665 digits)
         const int MAX_OUTPUT_DIGITS_CONVERGENTS = 30;
         const int MAX_CONTINUED_FRACTION_ITEMS = 100;
-        const int MAX_DIGITS = 1000; // (for numerator and denominator)
+        const int MAX_DIGITS = 1001; // (for numerator and denominator)
         readonly TimeSpan DELAY_BEFORE_CALCULATION = TimeSpan.FromMilliseconds( 444 );
         readonly TimeSpan DELAY_BEFORE_PROGRESS = TimeSpan.FromMilliseconds( 455 ); // (must be greater than 'DELAY_BEFORE_CALCULATION')
         readonly TimeSpan MIN_DURATION_PROGRESS = TimeSpan.FromMilliseconds( 444 );
@@ -474,6 +474,12 @@ namespace ContinuedFractions
                         .AppendLine( $"{convergent_number.ToString( ).PadLeft( 2, '\u2007' )}:\u2007{p.n:D} / {p.d:D} {( fsa ? '≈' : '=' )} {fs}" );
 
                     ++convergent_number;
+                }
+
+                if( too_long )
+                {
+                    sb_convergents
+                        .AppendLine( "\u22EF" ); // 'MIDLINE HORIZONTAL ELLIPSIS' (U+22EF)
                 }
 
                 decimal_string = initialFraction.ToFloatString( cnc, MAX_OUTPUT_DIGITS_DECIMAL );

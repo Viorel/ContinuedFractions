@@ -25,8 +25,8 @@ Input               | Meaning
 0.8(3)              | Repeating (recurring) decimal
 5/6                 | Fraction
 1.2e&#x2011;7       | Scientific notation (1.2×10&#x207B;&#x2077;)
-pi                  | Number &#x03C0;&#xA0;&#x2248;&#xA0;3.1415926 (about 300&#xA0;digits)
-e                   | Euler's (Napier's) number _e_&#xA0;&#x2248;&#xA0;2.7182818 (about 300&#xA0;digits)
+pi                  | Number &#x03C0;&#xA0;&#x2248;&#xA0;3.1415926 (1000&#xA0;digits)
+e                   | Euler's (Napier's) number _e_&#xA0;&#x2248;&#xA0;2.7182818 (1000&#xA0;digits)
 
 ### Screenshots
 
