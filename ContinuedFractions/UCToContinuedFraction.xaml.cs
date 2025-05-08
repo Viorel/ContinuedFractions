@@ -462,7 +462,7 @@ namespace ContinuedFractions
                     remarks = $"{remarks}⚠ The continued fraction is too long.";
                 }
 
-                int convergent_number = 0;
+                int convergent_index = 0;
                 foreach( (BigInteger n, BigInteger d) p in ContinuedFractionUtilities.EnumerateContinuedFractionConvergents( continued_fraction_items ) )
                 {
                     Fraction f = new( p.n, p.d );
@@ -471,9 +471,20 @@ namespace ContinuedFractions
                     fs = fs.Replace( "≈", "" );
 
                     sb_convergents
-                        .AppendLine( $"{convergent_number.ToString( ).PadLeft( 2, '\u2007' )}:\u2007{p.n:D} / {p.d:D} {( fsa ? '≈' : '=' )} {fs}" );
+                        .Append( $"{convergent_index.ToString( ).PadLeft( 2, '\u2007' )}:\u2007" );
 
-                    ++convergent_number;
+                    if( convergent_index == 0 && f.D.IsOne )
+                    {
+                        sb_convergents
+                            .AppendLine( $"{( fsa ? "≈" : "" )}{fs}" );
+                    }
+                    else
+                    {
+                        sb_convergents
+                            .AppendLine( $"{p.n:D} / {p.d:D} {( fsa ? '≈' : '=' )} {fs}" );
+                    }
+
+                    ++convergent_index;
                 }
 
                 if( too_long )

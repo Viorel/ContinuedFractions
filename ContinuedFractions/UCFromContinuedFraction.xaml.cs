@@ -395,11 +395,11 @@ namespace ContinuedFractions
             StringBuilder sb_convergents = new( );
             string convergents_title;
 
-            int convergent_number = 0;
+            int convergent_index = 0;
             foreach( Fraction f in convergents )
             {
                 sb_convergents
-                    .Append( $"{convergent_number.ToString( ).PadLeft( 2, '\u2007' )}:\u2007" );
+                    .Append( $"{convergent_index.ToString( ).PadLeft( 2, '\u2007' )}:\u2007" );
 
                 if( !f.IsNormal )
                 {
@@ -413,11 +413,20 @@ namespace ContinuedFractions
                     string fs = f.ToFloatString( cnc, MAX_OUTPUT_DIGITS_CONVERGENTS );
                     bool fsa = fs.Contains( '≈' );
                     fs = fs.Replace( "≈", "" );
-                    sb_convergents
-                        .AppendLine( $"{f.N:D} / {f.D:D} {( fsa ? '≈' : '=' )} {fs}" );
+
+                    if( convergent_index == 0 && f.D.IsOne )
+                    {
+                        sb_convergents
+                            .AppendLine( $"{( fsa ? "≈" : "" )}{fs}" );
+                    }
+                    else
+                    {
+                        sb_convergents
+                            .AppendLine( $"{f.N:D} / {f.D:D} {( fsa ? '≈' : '=' )} {fs}" );
+                    }
                 }
 
-                ++convergent_number;
+                ++convergent_index;
             }
 
             StringBuilder sb_corrected = new( );
