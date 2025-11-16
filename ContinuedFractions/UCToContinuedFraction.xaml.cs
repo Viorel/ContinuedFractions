@@ -679,8 +679,13 @@ namespace ContinuedFractions
             (
              (
               (\+|(?<negative>-))? \s* (?<integer>\d+) 
-              ((\s* \. \s* (?<floating>\d+)) | \.)? 
-              (\s* \( \s* (?<repeating>\d+) \s* \) )? 
+              (
+                \s* \. \s* 
+                (?<floating>\d+)? 
+                \s*
+                (\( \s* (?<repeating>\d+) \s* \))? 
+                (?(floating)|(?(repeating)|(?!))) # at least one should be present
+              )? 
               (\s* [eE] \s* (\+|(?<negative_exponent>-))? \s* (?<exponent>\d+))? 
              )
             |

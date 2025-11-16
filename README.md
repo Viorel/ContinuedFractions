@@ -48,7 +48,7 @@ The program runs in this environment:
 
 To use it, download and unzip the latest archive from the **Releases** section. Launch the **ContinuedFractions** executable.
 
-Alternatively, the source files, which are got from the **Releases** section too, can be compiled in Visual Studio 2022
+Alternatively, the source files can be got from the **Releases** section too and compiled in Visual Studio 2026
 that includes the “.NET desktop development” workload. The program is made in C#, WPF.
 
 ### References
