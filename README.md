@@ -16,6 +16,8 @@ Entered continued fraction | The result
 [ 12; 2, 1, 16 ]    | 12.34
 [ 0; 1, 5 ]         | 0.8(3)
 
+*Note.* Periodic continued fractions are not supported.
+
 The program accepts various kinds of numbers:
 
 Input               | Meaning
