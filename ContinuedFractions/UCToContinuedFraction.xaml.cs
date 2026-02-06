@@ -365,6 +365,8 @@ namespace ContinuedFractions
 
                     Debug.Assert( n >= 0 );
 
+                    cnc.TryThrow( );
+
                     while( error_text == null && e > 0 )
                     {
                         n *= 10;
@@ -376,12 +378,16 @@ namespace ContinuedFractions
                         }
                     }
 
+                    cnc.TryThrow( );
+
                     if( error_text == null )
                     {
                         BigInteger[] continued_fraction_items =
                             [.. ContinuedFractionUtilities
                             .EnumerateContinuedFraction( n, d )
                             .Take( MAX_CONTINUED_FRACTION_ITEMS + 1 )];
+
+                        cnc.TryThrow( );
 
                         if( fraction.IsNegative ) continued_fraction_items = ContinuedFractionUtilities.Negate( continued_fraction_items );
 
@@ -463,7 +469,7 @@ namespace ContinuedFractions
                 }
 
                 int convergent_index = 0;
-                foreach( (BigInteger n, BigInteger d) p in ContinuedFractionUtilities.EnumerateContinuedFractionConvergents( continued_fraction_items ) )
+                foreach( (BigInteger n, BigInteger d) p in ContinuedFractionUtilities.EnumerateContinuedFractionConvergents( continued_fraction_items, period: 0, maxConvergents: int.MaxValue ) )
                 {
                     Fraction f = new( p.n, p.d );
                     string fs = f.ToFloatString( cnc, MAX_OUTPUT_DIGITS_CONVERGENTS );
@@ -471,7 +477,7 @@ namespace ContinuedFractions
                     fs = fs.Replace( "≈", "" );
 
                     sb_convergents
-                        .Append( $"{convergent_index.ToString( ).PadLeft( 2, '\u2007' )}:\u2007" );
+                        .Append( $"{convergent_index.ToString( ).PadLeft( 2, '\u2007' )}:\u2007" ); // U+2007 FIGURE SPACE
 
                     if( convergent_index == 0 && f.D.IsOne )
                     {
@@ -701,7 +707,7 @@ namespace ContinuedFractions
              (?<e>e)
                         )
             \s* $
-            """, RegexOptions.IgnorePatternWhitespace
+            """, RegexOptions.IgnorePatternWhitespace, 20_000
         )]
         private static partial Regex RegexToParseNumber( );
     }

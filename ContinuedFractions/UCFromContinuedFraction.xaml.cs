@@ -30,6 +30,7 @@ namespace ContinuedFractions
         const int MAX_OUTPUT_DIGITS_FRACTION = 200;
         const int MAX_OUTPUT_DIGITS_CONVERGENTS = 30;
         const int MAX_CONTINUED_FRACTION_ITEMS = 100;
+        const int MAX_PERIODIC_CONTINUED_FRACTION_CONVERGENTS = 100;
         const int MAX_DIGITS = 300; // (for numerator and denominator)
         readonly TimeSpan DELAY_BEFORE_CALCULATION = TimeSpan.FromMilliseconds( 444 );
         readonly TimeSpan DELAY_BEFORE_PROGRESS = TimeSpan.FromMilliseconds( 455 ); // (must be greater than 'DELAY_BEFORE_CALCULATION')
@@ -172,13 +173,13 @@ namespace ContinuedFractions
             {
                 StopThread( );
 
-                (bool is_negative, IReadOnlyList<BigInteger>? continued_fraction) = GetInputContinuedFraction( );
+                (bool is_negative, IReadOnlyList<BigInteger>? continued_fraction, int period) = GetInputContinuedFraction( );
                 if( continued_fraction == null ) return;
 
                 mLastCancellable = new SimpleCancellable( );
                 mCalculationThread = new Thread( ( ) =>
                 {
-                    CalculationThreadProc( mLastCancellable, is_negative, continued_fraction );
+                    CalculationThreadProc( mLastCancellable, is_negative, continued_fraction, period );
                 } )
                 {
                     IsBackground = true,
@@ -198,7 +199,7 @@ namespace ContinuedFractions
             }
         }
 
-        (bool isNegative, IReadOnlyList<BigInteger>? list) GetInputContinuedFraction( )
+        (bool isNegative, IReadOnlyList<BigInteger>? list, int period) GetInputContinuedFraction( )
         {
             string input_text = textBoxContinuedFraction.Text;
 
@@ -207,7 +208,7 @@ namespace ContinuedFractions
                 ShowOneRichTextBox( richTextBoxNote );
                 HideProgress( );
 
-                return (false, null);
+                return (false, null, 0);
             }
 
             Match m = RegexToParseContinuedFraction( ).Match( input_text );
@@ -217,12 +218,15 @@ namespace ContinuedFractions
                 ShowOneRichTextBox( richTextBoxTypicalError );
                 HideProgress( );
 
-                return (false, null);
+                return (false, null, 0);
             }
 
             bool is_negative = m.Groups["is_negative"].Success;
+            Group first_group = m.Groups["first"];
 
-            BigInteger first = BigInteger.Parse( m.Groups["first"].Value );
+            Debug.Assert( first_group.Success );
+
+            BigInteger first = BigInteger.Parse( first_group.Value );
 
             List<BigInteger> list = [first];
 
@@ -238,27 +242,108 @@ namespace ContinuedFractions
                 }
             }
 
-            return (is_negative, list);
+            int period = 0;
+            Group left_par_group = m.Groups["lpar"];
+
+            if( left_par_group.Success )
+            {
+                if( left_par_group.Index < first_group.Index )
+                {
+                    period = list.Count;
+                }
+                else
+                {
+                    (int Index, Capture Item) first_capture_after_left_par = next_group.Captures.Cast<Capture>( ).Index( ).FirstOrDefault( c => left_par_group.Index < c.Item.Index );
+
+                    Debug.Assert( first_capture_after_left_par.Item != null );
+
+                    period = list.Count - 1 - first_capture_after_left_par.Index;
+                }
+
+                Debug.Assert( period > 0 );
+            }
+
+            return (is_negative, list, period);
         }
 
-        void CalculationThreadProc( ICancellable cnc, bool isNegative, IReadOnlyList<BigInteger> continuedFraction )
+        void CalculationThreadProc( ICancellable cnc, bool isNegative, IReadOnlyList<BigInteger> continuedFraction, int period )
         {
             try
             {
                 CalculationContext ctx = new( cnc, MAX_DIGITS );
+                bool is_periodic = period > 0;
+
+                int max_convergents = !is_periodic ? int.MaxValue : ( Math.Max( continuedFraction.Count, MAX_PERIODIC_CONTINUED_FRACTION_CONVERGENTS ) + 1 );
 
                 Fraction[] convergents =
                     ContinuedFractionUtilities
-                        .EnumerateContinuedFractionConvergents( continuedFraction )
+                        .EnumerateContinuedFractionConvergents( continuedFraction, period, max_convergents )
                         .Select( p =>
                                     p.d.IsZero ? p.n < 0 ? Fraction.NegativeInfinity : p.n > 0 ? Fraction.PositiveInfinity : Fraction.Undefined
                                     : new Fraction( p.d < 0 ? -p.n : p.n, BigInteger.Abs( p.d ) )
                                 )
                         .ToArray( );
 
+                cnc.TryThrow( );
+
                 IReadOnlyList<BigInteger>? corrected_regular_continued_fraction = null;
 
-                Fraction result = convergents.Last( );
+                Fraction result;
+                bool are_convergents_truncated = false;
+
+                if( !is_periodic )
+                {
+                    result = convergents.Last( );
+                }
+                else
+                {
+                    // evaluate the convergence (empirical)
+
+                    Fraction[] tail = convergents[^Math.Min( convergents.Length, Math.Max( period * 2, MAX_PERIODIC_CONTINUED_FRACTION_CONVERGENTS / 2 ) )..];
+                    bool is_abnormal = false;
+
+                    if( tail.Any( t => t.IsNormal ) && tail.Any( t => !t.IsNormal ) )
+                    {
+                        is_abnormal = true;
+                    }
+                    else
+                    {
+                        for( int i = 2; i < tail.Length; ++i )
+                        {
+                            cnc.TryThrow( );
+
+                            Fraction a = tail[i - 2];
+                            Fraction b = tail[i - 1];
+                            Fraction c = tail[i];
+
+                            Fraction diff_a_b = Fraction.Abs( Fraction.Sub( a, b, ctx ), ctx );
+                            Fraction diff_b_c = Fraction.Abs( Fraction.Sub( b, c, ctx ), ctx );
+
+                            if( diff_a_b.CompareTo( cnc, diff_b_c ) < 0 )
+                            {
+                                is_abnormal = true;
+
+                                break;
+                            }
+                        }
+                    }
+
+                    if( convergents.Length > max_convergents )
+                    {
+                        convergents = convergents[0..max_convergents];
+                        are_convergents_truncated = true;
+                        result = convergents.Last( ).AsApprox( );
+                    }
+                    else
+                    {
+                        result = convergents.Last( );
+                    }
+
+                    if( is_abnormal ) result = Fraction.Undefined;
+                }
+
+                cnc.TryThrow( );
+
                 if( isNegative ) result = Fraction.Neg( result, ctx );
                 result = result.Simplify( ctx );
 
@@ -280,6 +365,8 @@ namespace ContinuedFractions
 
                     Debug.Assert( n >= 0 );
 
+                    cnc.TryThrow( );
+
                     while( e > 0 )
                     {
                         n *= 10;
@@ -290,21 +377,33 @@ namespace ContinuedFractions
 
                     Debug.Assert( e.IsZero );
 
-                    BigInteger[] continued_fraction_items =
-                        [.. ContinuedFractionUtilities
+                    cnc.TryThrow( );
+
+                    if( !is_periodic )
+                    {
+                        BigInteger[] continued_fraction_items =
+                            [.. ContinuedFractionUtilities
                             .EnumerateContinuedFraction( BigInteger.Abs(result.N), result.D )
                             .Take( MAX_CONTINUED_FRACTION_ITEMS + 1 )];
 
-                    if( continued_fraction_items.Length < MAX_CONTINUED_FRACTION_ITEMS )
-                    {
-                        if( result.IsNegative ) continued_fraction_items = ContinuedFractionUtilities.Negate( continued_fraction_items );
+                        cnc.TryThrow( );
 
-                        bool is_not_regular = !continued_fraction_items.SequenceEqual( continuedFraction );
-
-                        if( is_not_regular )
+                        if( continued_fraction_items.Length < MAX_CONTINUED_FRACTION_ITEMS )
                         {
-                            corrected_regular_continued_fraction = continued_fraction_items;
+                            if( result.IsNegative ) continued_fraction_items = ContinuedFractionUtilities.Negate( continued_fraction_items );
+
+                            bool is_not_regular = !continued_fraction_items.SequenceEqual( continuedFraction );
+
+                            if( is_not_regular )
+                            {
+                                corrected_regular_continued_fraction = continued_fraction_items;
+                            }
                         }
+                    }
+                    else
+                    {
+                        // TODO: implement the correction in case of periodic continued fractions
+                        Debug.Assert( corrected_regular_continued_fraction == null );
                     }
                 }
 
@@ -312,7 +411,7 @@ namespace ContinuedFractions
 
                 if( error_text == null )
                 {
-                    ShowResults( cnc, result, convergents, corrected_regular_continued_fraction );
+                    ShowResults( cnc, result, convergents, corrected_regular_continued_fraction, are_convergents_truncated, is_periodic );
 
                     HideProgress( );
                 }
@@ -338,7 +437,7 @@ namespace ContinuedFractions
             }
         }
 
-        void ShowResults( ICancellable cnc, Fraction result, Fraction[] convergents, IReadOnlyList<BigInteger>? correctedRegularContinuedFraction )
+        void ShowResults( ICancellable cnc, Fraction result, Fraction[] convergents, IReadOnlyList<BigInteger>? correctedRegularContinuedFraction, bool areConvergentsTruncated, bool isPeriodic )
         {
             bool is_corrected = correctedRegularContinuedFraction != null;
             bool is_normal = result.IsNormal;
@@ -387,6 +486,8 @@ namespace ContinuedFractions
                 result_as_fraction = $"{( is_negative ? -n : n ):D}";
                 if( !e.IsZero ) result_as_fraction = $"{result_as_fraction}e{( e >= 0 ? "+" : "" )}{e:D}";
                 if( !d.IsOne ) result_as_fraction = $"{result_as_fraction} / {d:D}";
+
+                if( result.IsApprox ) result_as_fraction = $"≈{result_as_fraction}";
             }
 #else
             result_as_fraction = result.ToRationalString( cnc, MAX_OUTPUT_DIGITS_FRACTION );
@@ -399,7 +500,7 @@ namespace ContinuedFractions
             foreach( Fraction f in convergents )
             {
                 sb_convergents
-                    .Append( $"{convergent_index.ToString( ).PadLeft( 2, '\u2007' )}:\u2007" );
+                    .Append( $"{convergent_index.ToString( ).PadLeft( 2, '\u2007' )}:\u2007" ); // U+2007 FIGURE SPACE
 
                 if( !f.IsNormal )
                 {
@@ -428,6 +529,8 @@ namespace ContinuedFractions
 
                 ++convergent_index;
             }
+
+            if( areConvergentsTruncated ) sb_convergents.AppendLine( ". . ." );
 
             StringBuilder sb_corrected = new( );
 
@@ -463,9 +566,9 @@ namespace ContinuedFractions
                     runConvergents.Text = sb_convergents.ToString( );
                     runConvergentsTitle.Text = convergents_title;
 
-                    UIUtilities.ShowTopBlock( richTextBoxResults.Document, sectionInfo, is_normal && !is_corrected, sectionFraction );
-                    UIUtilities.ShowTopBlock( richTextBoxResults.Document, sectionWarning, is_normal && is_corrected, sectionFraction );
-                    UIUtilities.ShowTopBlock( richTextBoxResults.Document, sectionCorrected, is_normal && is_corrected, sectionFraction, sectionWarning );
+                    UIUtilities.ShowTopBlock( richTextBoxResults.Document, sectionInfo, is_normal && !is_corrected && !isPeriodic, sectionFraction );
+                    UIUtilities.ShowTopBlock( richTextBoxResults.Document, sectionWarning, is_normal && is_corrected && !isPeriodic, sectionFraction );
+                    UIUtilities.ShowTopBlock( richTextBoxResults.Document, sectionCorrected, is_normal && is_corrected && !isPeriodic, sectionFraction, sectionWarning );
 
                     ShowOneRichTextBox( richTextBoxResults );
 
@@ -601,11 +704,14 @@ namespace ContinuedFractions
         [GeneratedRegex( """
             (?xni)
             ^
-            \s* ((\+|(?<is_negative>-))? \s* \[)? \s*
-            (?<first>[\-\+]?\d+) (\s* ([,;]|\s+) \s* (?<next>[\-\+]?\d+))* [,;]?
-            \s* \]? \s*
+            \s* ((\+|(?<is_negative>-))? \s* (?<lbr>\[)? \s* (?<lpar>\()? (?(lbr)|(?(lpar)|(?!))) )? \s*
+            (?<first>[\-\+]?\d+ \s*) 
+            (([,;]\s*|\s+) (?<lpar>(?(lpar)(?!)|\(\s*))? (?<next>[\-\+]?\d+) \s*)*
+            ([,;])? \s*
+            (?(lpar)\)) \s*
+            \]? \s*
             $
-            """, RegexOptions.IgnorePatternWhitespace
+            """, RegexOptions.IgnorePatternWhitespace, 20_000
         )]
         private static partial Regex RegexToParseContinuedFraction( );
     }

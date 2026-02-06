@@ -28,7 +28,7 @@ namespace ContinuedFractionsLibrary
             }
         }
 
-        public static IEnumerable<(BigInteger n, BigInteger d)> EnumerateContinuedFractionConvergents( IReadOnlyList<BigInteger> continuedFraction )
+        public static IEnumerable<(BigInteger n, BigInteger d)> EnumerateContinuedFractionConvergents( IReadOnlyList<BigInteger> continuedFraction, int period, int maxConvergents )
         {
             // https://r-knott.surrey.ac.uk/Fibonacci/cfINTRO.html#convergrecurr
 
@@ -41,10 +41,38 @@ namespace ContinuedFractionsLibrary
 
             yield return (n, d);
 
-            for( int i = 1; i < continuedFraction.Count; i++ )
+            if( period < 0 ) period = 0;
+
+            int before_period = continuedFraction.Count - period;
+
+            for( int i = 1; ; i++ )
             {
-                BigInteger new_n = continuedFraction[i] * n + prev_n;
-                BigInteger new_d = continuedFraction[i] * d + prev_d;
+                if( i > maxConvergents ) break;
+                if( period == 0 && i >= continuedFraction.Count ) break;
+
+                int adjusted_i;
+
+                if( period == 0 )
+                {
+                    adjusted_i = i;
+                }
+                else
+                {
+                    if( i < before_period )
+                    {
+                        adjusted_i = i;
+                    }
+                    else
+                    {
+                        adjusted_i = ( i - before_period ) % period + before_period;
+                    }
+
+                    Debug.Assert( adjusted_i >= 0 );
+                    Debug.Assert( adjusted_i < continuedFraction.Count );
+                }
+
+                BigInteger new_n = continuedFraction[adjusted_i] * n + prev_n;
+                BigInteger new_d = continuedFraction[adjusted_i] * d + prev_d;
 
                 //Debug.WriteLine( $"{new_n:D}/{new_d:D}" );
 
