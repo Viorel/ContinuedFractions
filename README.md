@@ -1,4 +1,4 @@
-# Continued Fractions
+﻿# Continued Fractions
 
 An experimental tool that converts decimal and rational numbers to continued fractions, and vice versa.
 The program also displays the convergents, and converts the simple continued fractions to regular ones.
@@ -15,8 +15,9 @@ Entered continued fraction | The result
 :---                | :--- 
 [ 12; 2, 1, 16 ]    | 12.34
 [ 0; 1, 5 ]         | 0.8(3)
+[ 1; (2) ]          | ≈1.41421356
 
-*Note.* Periodic continued fractions are not supported.
+*Note.* The “( )” denotes periodic parts.
 
 The program accepts various kinds of numbers:
 
@@ -26,7 +27,7 @@ Input               | Meaning
 12.34               | Decimal number
 0.8(3)              | Repeating (recurring) decimal
 5/6                 | Fraction
-1.2e&#x2011;7       | Scientific notation (1.2�10&#x207B;&#x2077;)
+1.2e&#x2011;7       | Scientific notation (1.2×10&#x207B;&#x2077;)
 pi                  | Number &#x03C0;&#xA0;&#x2248;&#xA0;3.1415926 (1000&#xA0;digits)
 e                   | Euler's (Napier's) number _e_&#xA0;&#x2248;&#xA0;2.7182818 (1000&#xA0;digits)
 
@@ -51,9 +52,10 @@ The program runs in this environment:
 To use it, download and unzip the latest archive from the **Releases** section. Launch the **ContinuedFractions** executable.
 
 Alternatively, the source files can be got from the **Releases** section too and compiled in Visual Studio 2026
-that includes the �.NET desktop development� workload. The program is made in C#, WPF.
+that includes the “.NET desktop development” workload. The program is made in C#, WPF.
 
 ### References
 
-* Dr Ron Knott, *An introduction to Continued Fractions* � https://r-knott.surrey.ac.uk/Fibonacci/cfINTRO.html
-* Conrad, K\., *Negation and Inversion of Continued Fractions* � https://kconrad.math.uconn.edu/blurbs/ugradnumthy/contfrac-neg-invert.pdf
+* Dr Ron Knott, *An introduction to Continued Fractions* — https://r-knott.surrey.ac.uk/Fibonacci/cfINTRO.html
+* Conrad, K\., *Negation and Inversion of Continued Fractions* — https://kconrad.math.uconn.edu/blurbs/ugradnumthy/contfrac-neg-invert.pdf
+* *Periodic Continued Fraction* — https://mathworld.wolfram.com/PeriodicContinuedFraction.html
