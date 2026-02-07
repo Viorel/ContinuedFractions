@@ -682,6 +682,10 @@ namespace ContinuedFractions
             {
             case ProgressStatusEnum.DelayToShow:
                 labelPleaseWait.Visibility = Visibility.Visible;
+                if( richTextBoxError.Visibility == Visibility.Visible || richTextBoxTypicalError.Visibility == Visibility.Visible )
+                {
+                    ShowOneRichTextBox( richTextBoxNote );
+                }
                 mProgressShownTime = DateTime.Now;
                 break;
             case ProgressStatusEnum.DelayToHide:
