@@ -31,7 +31,9 @@
                     <Run Text="Example:" FontStyle="Italic"/>
                     <Run Text="[1; 2, 3, 4]" />
                     <Run Text="or just" FontStyle="Italic"/>
-                    <Run Text="1 2 3 4" />
+                    <Run Text="1 2 3 4." />
+                    <Run Text="Use “( )” for periods: " FontStyle="Italic"/>
+                    <Run Text="1 2 (3 4)" />
                 </TextBlock>
             </Label>
         </Grid>
@@ -75,6 +77,14 @@
                             <LineBreak/>
                             <Run FontWeight="Normal" Text="or"/>
                             <Run Text="1 2 3 4"/>
+                            <LineBreak/>
+                            <LineBreak/>                   
+                            <Run FontWeight="Normal" Text="For periodic fractions, use “( )”:"/>
+                            <LineBreak/>
+                            <Run Text="[1; 2, (3, 4)]"/>
+                            <LineBreak/>
+                            <Run FontWeight="Normal" Text="or"/>
+                            <Run Text="1 2 (3 4)"/>
                             <LineBreak/>
                         </Paragraph>
                     </FlowDocument>
